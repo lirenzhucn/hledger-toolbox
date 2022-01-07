@@ -1,3 +1,5 @@
+.secrets
+
 dist
 dist-*
 cabal-dev
