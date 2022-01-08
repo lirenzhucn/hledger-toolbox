@@ -9,10 +9,9 @@ import Data.ByteString.Lazy (fromStrict)
 import Data.Text (Text)
 import qualified Data.Map.Strict as Map
 import Data.Text.Encoding (encodeUtf8)
+import Database.SQLite.Simple (Connection)
 import GHC.Generics (Generic)
-import Network.HTTP.Req ( Scheme(Https), Url, useHttpsURI, https, (/:) )
-import Text.URI (URI, mkURI)
-import Data.Maybe (fromMaybe)
+import Network.HTTP.Req ( Scheme(Https), Url )
 
 data CurrencyFormat = CurrencyFormat
     { iso_code :: Text
@@ -116,16 +115,5 @@ decodeFromJSON content = decode $ fromStrict $ encodeUtf8 content
 
 data AppEnv = AppEnv
     { appSettings :: AppSettings
-    , baseURL :: Url 'Https }
-
-initEnv :: AppSettings -> AppEnv
-initEnv settings = AppEnv
-    { appSettings = settings
-    , baseURL = fromMaybe defaultURL maybeURL  }
-    where
-        maybeURL = makeURL $ api_base_url $ ynab_api_settings settings
-        defaultURL = https "api.youneedabudget.com" /: "v1"
-
-makeURL :: Text -> Maybe (Url 'Https)
-makeURL urlText =
-    pure urlText >>= mkURI >>= useHttpsURI >>= (\(ep, _) -> Just ep)
+    , baseURL :: Url 'Https
+    , dbConn :: Connection }

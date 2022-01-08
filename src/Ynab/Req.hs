@@ -1,11 +1,11 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DataKinds #-}
 
 module Ynab.Req (getBudget) where
 
 import Control.Monad.Catch
-import Control.Monad.Reader
 import Data.Aeson
 import Data.Map.Strict (Map)
 import Data.Maybe (isNothing)
@@ -14,7 +14,6 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import GHC.Generics (Generic)
 import Network.HTTP.Req
-import Ynab (YnabApp)
 import Ynab.Types
 import Ynab.STExcept (rethrowReqException, YnabAPIException (..))
 import Text.URI (URI, mkURI)
@@ -43,13 +42,12 @@ buildWrappedGETRequest :: (MonadHttp m, FromJSON d) =>
 buildWrappedGETRequest ep = req GET ep NoReqBody
     (jsonResponse :: Proxy (JsonResponse (PayloadWrapper d)))
 
-getBudget :: YnabApp Budget
-getBudget = handle rethrowReqException $ do
-    AppEnv { appSettings, baseURL } <- ask
+getBudget :: AppSettings -> Url 'Https -> IO Budget
+getBudget appSettings baseURL = do
     let apiSettings = ynab_api_settings appSettings
         ep = baseURL /: "budgets"
         request = buildWrappedGETRequest ep $ buildAuthHeader $ api_token apiSettings
-    res <- liftIO $ responseBody <$> runReq defaultHttpConfig request
+    res <- responseBody <$> runReq defaultHttpConfig request
     let BudgetDataField { budgets } = dataField res
     case filter (\b -> budget_name_ b == budget_name appSettings) budgets of
         []    -> throwM (InvalidPayloadData "budgets")
