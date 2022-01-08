@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-
 module Ynab.STExcept where
 
 import Control.Monad.Catch (MonadThrow(..), Exception (toException), SomeException)

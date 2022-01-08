@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DataKinds #-}
-
 module Ynab.Types where
 
 import Data.Aeson

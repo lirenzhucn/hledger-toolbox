@@ -1,6 +1,5 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
 
 module Ynab where
 
@@ -17,9 +16,9 @@ import Ynab.Types
 
 newtype YnabApp a = YnabApp
     { runApp :: ReaderT AppEnv IO a }
-    deriving (Functor, Applicative, Monad, MonadIO,
-              MonadThrow, MonadCatch, MonadMask,
-              MonadReader AppEnv)
+    deriving newtype (Functor, Applicative, Monad, MonadIO,
+                      MonadThrow, MonadCatch, MonadMask,
+                      MonadReader AppEnv)
 
 runYnabApp :: YnabApp a -> AppEnv -> IO a
 runYnabApp app = runReaderT (runApp app)

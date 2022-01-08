@@ -35,6 +35,11 @@ library
     -- other-extensions:
     default-extensions:
         OverloadedStrings
+        NamedFieldPuns
+        QuasiQuotes
+        DeriveAnyClass
+        DeriveGeneric
+        DataKinds
     build-depends:
         aeson ^>=2.0,
         base ^>=4.14,

@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE QuasiQuotes #-}
-
 module Ynab.Db (closeDbConn, initDbConn) where
 
 import Control.Monad.Catch (Exception, MonadThrow(..), handle)
