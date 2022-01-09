@@ -36,7 +36,6 @@ library
     default-extensions:
         OverloadedStrings
         NamedFieldPuns
-        QuasiQuotes
         DeriveAnyClass
         DeriveGeneric
         DataKinds
@@ -51,7 +50,6 @@ library
         http-client ^>=0.7.9,
         modern-uri ^>=0.3.4,
         mtl ^>=2.2,
-        raw-strings-qq ^>=1.1,
         req ^>=3.9.2,
         sqlite-simple ^>=0.4.18,
         text ^>= 1.2,
@@ -84,14 +82,12 @@ test-suite hledger-toolbox-test
     hs-source-dirs:   test
     main-is:          YnabTest.hs
     default-extensions:
-        OverloadedStrings,
-        QuasiQuotes
+        OverloadedStrings
     build-depends:
         aeson ^>=2.0,
         base ^>=4.14,
         bytestring ^>=0.10.12.0,
         hledger-toolbox,
-        raw-strings-qq ^>=1.1,
         tasty ^>=1.4.2.1,
         tasty-hunit ^>=0.10.0.3,
         text ^>= 1.2

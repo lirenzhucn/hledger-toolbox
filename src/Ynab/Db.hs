@@ -7,7 +7,6 @@ import Data.Text (Text, unpack)
 import Database.SQLite.Simple (Connection, SQLError, close, execute_, open)
 import System.Directory (doesFileExist)
 import System.FilePath (FilePath, (<.>), (</>))
-import Text.RawString.QQ
 import Ynab.Types (AppEnv (..))
 
 dbFilePath :: FilePath -> Text -> FilePath
@@ -30,18 +29,14 @@ reseedDb :: Connection -> IO ()
 reseedDb conn = do
   execute_
     conn
-    [r|
-    CREATE TABLE server_knowledge (
-        type_ TEXT PRIMARY KEY, value TEXT
-    )
-    |]
+    "CREATE TABLE server_knowledge (\
+    \    type_ TEXT PRIMARY KEY, value TEXT\
+    \)"
   execute_
     conn
-    [r|
-    CREATE TABLE payees (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        transfer_account_id TEXT,
-        deleted BOOL
-    )
-    |]
+    "CREATE TABLE payees (\
+    \    id TEXT PRIMARY KEY,\
+    \    name TEXT,\
+    \    transfer_account_id TEXT,\
+    \    deleted BOOL\
+    \)"
