@@ -6,7 +6,6 @@ import Data.Text.Lazy.Encoding (encodeUtf8)
 import Test.Tasty
 import Test.Tasty.HUnit
 import Text.RawString.QQ
-
 import Ynab.Types
 
 main :: IO ()
@@ -15,15 +14,17 @@ main = defaultMain tests
 tests :: TestTree
 tests = testGroup "Tests" [dataTypeJsonTests]
 
-dataTypeJsonTests = testGroup "Data type JSON tests"
-    [
-        testCase "CurrencyFormat from JSON" $ decodeFromJSON actualCFJson @?= expectedCF
-      , testCase "Account from JSON" $ decodeFromJSON actualAccJson @?= expectedAcc
-      , testCase "Budget from JSON" $ decodeFromJSON actualBudgetJson @?= expectedBudget
-      , testCase "Payee from JSON" $ decodeFromJSON actualPayeeJson @?= expectedPayee
+dataTypeJsonTests =
+  testGroup
+    "Data type JSON tests"
+    [ testCase "CurrencyFormat from JSON" $ decodeFromJSON actualCFJson @?= expectedCF,
+      testCase "Account from JSON" $ decodeFromJSON actualAccJson @?= expectedAcc,
+      testCase "Budget from JSON" $ decodeFromJSON actualBudgetJson @?= expectedBudget,
+      testCase "Payee from JSON" $ decodeFromJSON actualPayeeJson @?= expectedPayee
     ]
-    where
-        actualCFJson = [r|{
+  where
+    actualCFJson =
+      [r|{
             "iso_code": "",
             "example_format": "$1,000.00",
             "decimal_digits": 2,
@@ -33,16 +34,20 @@ dataTypeJsonTests = testGroup "Data type JSON tests"
             "currency_symbol": "$",
             "display_symbol": true
         }|]
-        expectedCF = Just CurrencyFormat
-            { iso_code = "",
-              example_format = "$1,000.00",
-              decimal_digits = 2,
-              decimal_separator = ".",
-              symbol_first = True,
-              group_separator = ",",
-              currency_symbol = "$",
-              display_symbol = True }
-        actualAccJson = [r|{
+    expectedCF =
+      Just
+        CurrencyFormat
+          { iso_code = "",
+            example_format = "$1,000.00",
+            decimal_digits = 2,
+            decimal_separator = ".",
+            symbol_first = True,
+            group_separator = ",",
+            currency_symbol = "$",
+            display_symbol = True
+          }
+    actualAccJson =
+      [r|{
             "balance": -81699740,
             "cleared_balance": -81699740,
             "closed": false,
@@ -57,21 +62,25 @@ dataTypeJsonTests = testGroup "Data type JSON tests"
             "type": "otherLiability",
             "uncleared_balance": 0
         }|]
-        expectedAcc = Just Account
-            { balance = -81699740
-            , cleared_balance = -81699740
-            , closed = False
-            , account_deleted = False
-            , direct_import_in_error = False
-            , direct_import_linked = False
-            , account_id = "81d688b3-88d0-4663-ad8b-0446f0dbdb12"
-            , account_name = "ZHU Family Vault"
-            , note = Just "#type=long_term_liability"
-            , on_budget = False
-            , transfer_payee_id = "76a2b19e-da78-4f7a-ba10-64fa67ca9eae"
-            , type_ = "otherLiability"
-            , uncleared_balance = 0 }
-        actualBudgetJson = [r|{
+    expectedAcc =
+      Just
+        Account
+          { balance = -81699740,
+            cleared_balance = -81699740,
+            closed = False,
+            account_deleted = False,
+            direct_import_in_error = False,
+            direct_import_linked = False,
+            account_id = "81d688b3-88d0-4663-ad8b-0446f0dbdb12",
+            account_name = "ZHU Family Vault",
+            note = Just "#type=long_term_liability",
+            on_budget = False,
+            transfer_payee_id = "76a2b19e-da78-4f7a-ba10-64fa67ca9eae",
+            type_ = "otherLiability",
+            uncleared_balance = 0
+          }
+    actualBudgetJson =
+      [r|{
             "id": "string",
             "name": "string",
             "last_modified_on": "2022-01-06T02:56:18.374Z",
@@ -108,44 +117,57 @@ dataTypeJsonTests = testGroup "Data type JSON tests"
                 }
             ]
         }|]
-        expectedBudget = Just Budget
-            { budget_id = "string"
-            , budget_name_ = "string"
-            , last_modified_on = "2022-01-06T02:56:18.374Z"
-            , first_month = "string"
-            , last_month = "string"
-            , date_format = DateFormat {format = "string"}
-            , currency_format = CurrencyFormat
-                { iso_code = "string"
-                , example_format = "string"
-                , decimal_digits = 0
-                , decimal_separator = "string"
-                , symbol_first = True
-                , group_separator = "string"
-                , currency_symbol = "string"
-                , display_symbol = True }
-            , accounts = Just [ Account
-                { account_id = "string"
-                , account_name = "string"
-                , type_ = "checking"
-                , on_budget = True
-                , closed = True
-                , note = Just "string"
-                , balance = 0
-                , cleared_balance = 0
-                , uncleared_balance = 0
-                , transfer_payee_id = "string"
-                , direct_import_linked = True
-                , direct_import_in_error = True
-                , account_deleted = True } ] }
-        actualPayeeJson = [r|{
+    expectedBudget =
+      Just
+        Budget
+          { budget_id = "string",
+            budget_name_ = "string",
+            last_modified_on = "2022-01-06T02:56:18.374Z",
+            first_month = "string",
+            last_month = "string",
+            date_format = DateFormat {format = "string"},
+            currency_format =
+              CurrencyFormat
+                { iso_code = "string",
+                  example_format = "string",
+                  decimal_digits = 0,
+                  decimal_separator = "string",
+                  symbol_first = True,
+                  group_separator = "string",
+                  currency_symbol = "string",
+                  display_symbol = True
+                },
+            accounts =
+              Just
+                [ Account
+                    { account_id = "string",
+                      account_name = "string",
+                      type_ = "checking",
+                      on_budget = True,
+                      closed = True,
+                      note = Just "string",
+                      balance = 0,
+                      cleared_balance = 0,
+                      uncleared_balance = 0,
+                      transfer_payee_id = "string",
+                      direct_import_linked = True,
+                      direct_import_in_error = True,
+                      account_deleted = True
+                    }
+                ]
+          }
+    actualPayeeJson =
+      [r|{
             "deleted": false,
             "id": "6662c233-c6f6-4938-b4e0-4223f93d62df",
             "name": "Transfer : LZ PRI HOL",
             "transfer_account_id": "3e315021-8204-446b-b133-6c3c6c359719"
         }|]
-        expectedPayee = Just Payee
-            { payee_id = "6662c233-c6f6-4938-b4e0-4223f93d62df"
-            , payee_name = "Transfer : LZ PRI HOL"
-            , payee_deleted = False
-            , transfer_account_id = Just "3e315021-8204-446b-b133-6c3c6c359719" }
+    expectedPayee =
+      Just
+        Payee
+          { payee_id = "6662c233-c6f6-4938-b4e0-4223f93d62df",
+            payee_name = "Transfer : LZ PRI HOL",
+            payee_deleted = False,
+            transfer_account_id = Just "3e315021-8204-446b-b133-6c3c6c359719"
+          }

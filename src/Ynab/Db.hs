@@ -1,14 +1,14 @@
 module Ynab.Db (closeDbConn, initDbConn) where
 
-import Control.Monad.Catch (Exception, MonadThrow(..), handle)
 import Control.Monad (when)
-import Control.Monad.State (get, modify, liftIO)
+import Control.Monad.Catch (Exception, MonadThrow (..), handle)
+import Control.Monad.State (get, liftIO, modify)
 import Data.Text (Text, unpack)
-import Database.SQLite.Simple (close, open, execute_, Connection, SQLError)
+import Database.SQLite.Simple (Connection, SQLError, close, execute_, open)
 import System.Directory (doesFileExist)
-import System.FilePath (FilePath, (</>), (<.>))
+import System.FilePath (FilePath, (<.>), (</>))
 import Text.RawString.QQ
-import Ynab.Types (AppEnv(..))
+import Ynab.Types (AppEnv (..))
 
 dbFilePath :: FilePath -> Text -> FilePath
 dbFilePath baseDir budgetId = baseDir </> (unpack budgetId) <.> "dat"
@@ -17,23 +17,27 @@ dbFilePath baseDir budgetId = baseDir </> (unpack budgetId) <.> "dat"
 -- reseed the database if the file does not exist
 initDbConn :: FilePath -> Text -> IO Connection
 initDbConn baseDir budgetId = do
-    let fpath = dbFilePath baseDir budgetId
-    dbFileExists <- doesFileExist fpath
-    conn <- open fpath
-    when (not dbFileExists) $ reseedDb conn
-    pure conn
+  let fpath = dbFilePath baseDir budgetId
+  dbFileExists <- doesFileExist fpath
+  conn <- open fpath
+  when (not dbFileExists) $ reseedDb conn
+  pure conn
 
 -- rename the export in case we need to add more steps
 closeDbConn = close
 
 reseedDb :: Connection -> IO ()
 reseedDb conn = do
-    execute_ conn [r|
+  execute_
+    conn
+    [r|
     CREATE TABLE server_knowledge (
         type_ TEXT PRIMARY KEY, value TEXT
     )
     |]
-    execute_ conn [r|
+  execute_
+    conn
+    [r|
     CREATE TABLE payees (
         id TEXT PRIMARY KEY,
         name TEXT,
