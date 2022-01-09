@@ -52,7 +52,7 @@ library
         modern-uri ^>=0.3.4,
         mtl ^>=2.2,
         raw-strings-qq ^>=1.1,
-        req,
+        req ^>=3.9.2,
         sqlite-simple ^>=0.4.18,
         text ^>= 1.2,
         hledger-lib ^>= 1.24
