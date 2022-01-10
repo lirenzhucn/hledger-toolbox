@@ -9,6 +9,13 @@ import Database.SQLite.Simple (Connection)
 import GHC.Generics (Generic)
 import Network.HTTP.Req (Scheme (Https), Url)
 
+-- type class that can be used as a payload item in the following json structure
+-- {"data": {"<key>": [...]}}
+-- instances provide a function isKeyValid to check <key> against instance type
+-- e.g. list of Budgets should have a "budgets" key
+class PayloadItems a where
+  isKeyValid :: a -> String -> Bool
+
 data CurrencyFormat = CurrencyFormat
   { iso_code :: Text,
     example_format :: Text,
@@ -37,6 +44,9 @@ data Account = Account
     direct_import_in_error :: Bool
   }
   deriving (Eq, Show, Generic)
+
+instance PayloadItems Account where
+  isKeyValid _ k = k == "accounts"
 
 instance FromJSON Account where
   parseJSON =
@@ -68,6 +78,9 @@ data Budget = Budget
   }
   deriving (Eq, Show, Generic)
 
+instance PayloadItems Budget where
+  isKeyValid _ k = k == "budgets"
+
 instance FromJSON Budget where
   parseJSON =
     genericParseJSON
@@ -88,6 +101,9 @@ data Payee = Payee
     payee_deleted :: Bool
   }
   deriving (Eq, Show, Generic)
+
+instance PayloadItems Payee where
+  isKeyValid _ k = k == "payees"
 
 instance FromJSON Payee where
   parseJSON =

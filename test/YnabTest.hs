@@ -19,11 +19,13 @@ dataTypeJsonTests =
     "Data type JSON tests"
     [ testCase "CurrencyFormat from JSON" $ decodeFromJSON actualCFJson @?= expectedCF,
       testCase "ListDataField from JSON" $
-        (decodeFromJSON actualLDFJson :: Maybe (ListDataField Text)) @?= expectedLDF,
+        (decodeFromJSON actualLDFJson :: Maybe (ListDataField Payee)) @?= expectedLDF,
       testCase "ListDataField from JSON Failed 1" $
-        (decodeFromJSON actualFailedLDFJson1 :: Maybe (ListDataField Text)) @?= Nothing,
+        (decodeFromJSON actualFailedLDFJson1 :: Maybe (ListDataField Payee)) @?= Nothing,
       testCase "ListDataField from JSON Failed 2" $
-        (decodeFromJSON actualFailedLDFJson2 :: Maybe (ListDataField Text)) @?= Nothing,
+        (decodeFromJSON actualFailedLDFJson2 :: Maybe (ListDataField Payee)) @?= Nothing,
+      testCase "ListDataField from JSON Failed 3" $
+        (decodeFromJSON actualFailedLDFJson3 :: Maybe (ListDataField Payee)) @?= Nothing,
       testCase "Account from JSON" $ decodeFromJSON actualAccJson @?= expectedAcc,
       testCase "Budget from JSON" $ decodeFromJSON actualBudgetJson @?= expectedBudget,
       testCase "Payee from JSON" $ decodeFromJSON actualPayeeJson @?= expectedPayee
@@ -52,10 +54,43 @@ dataTypeJsonTests =
             currency_symbol = "$",
             display_symbol = True
           }
-    actualLDFJson = "{\"payees\": [\"text1\", \"text2\"]}"
-    expectedLDF = Just $ ListDataField "payees" ["text1", "text2"]
+    actualLDFJson =
+      "{\"payees\": [\
+      \    {\
+      \        \"id\": \"123\",\
+      \        \"name\": \"Amazon\",\
+      \        \"deleted\": false\
+      \    },\
+      \    {\
+      \        \"id\": \"456\",\
+      \        \"name\": \"Costco\",\
+      \        \"deleted\": false\
+      \    }\
+      \]}"
+    expectedLDF =
+      Just $
+        ListDataField
+          "payees"
+          [ Payee
+              { payee_id = "123",
+                payee_name = "Amazon",
+                transfer_account_id = Nothing,
+                payee_deleted = False
+              },
+            Payee
+              { payee_id = "456",
+                payee_name = "Costco",
+                transfer_account_id = Nothing,
+                payee_deleted = False
+              }
+          ]
     actualFailedLDFJson1 = "{\"field1\": [\"value1\"], \"field2\": [\"value2\"]}"
     actualFailedLDFJson2 = "{\"field\": 1}"
+    -- payload key and data type mismatch
+    actualFailedLDFJson3 =
+      "{\"budgets\": [\
+      \    {\"id\": \"123\", \"name\": \"Amazon\", \"deleted\": false}\
+      \]}"
     actualAccJson =
       "{\
       \    \"balance\": -81699740,\

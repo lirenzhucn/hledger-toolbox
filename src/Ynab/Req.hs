@@ -45,7 +45,12 @@ instance (FromJSON a, PayloadItems a) => FromJSON (ListDataField a) where
     where
       -- NOTE: Need ScopedTypeVariable extension to work!
       parseItemList :: [(Key, Value)] -> Parser (ListDataField a)
-      parseItemList ((k, v):_) = ListDataField (toString k) <$> (parseJSON v :: Parser [a])
+      parseItemList ((k, v):_) = do
+        t <- parseJSON v :: Parser [a]
+        let flags = fmap (`isKeyValid` toString k) t
+        if and flags
+          then pure $ ListDataField (toString k) t
+          else fail $ "Invalid payload key (" <> toString k <> ")"
       parseItemList xs = fail "Object should have at least one matched key-value pair"
       validKeys :: [String]
       validKeys = ["budgets", "accounts", "payees"]
