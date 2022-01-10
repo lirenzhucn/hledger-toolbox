@@ -1,11 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Ynab.Req (getBudget, ListDataField (..)) where
+module Ynab.Req (getBudget, ListDataField (..), PayloadWrapper (..)) where
 
 import Control.Monad (when)
 import Control.Monad.Catch
 import Data.Aeson
 import Data.Aeson.Key (toString)
+import qualified Data.Aeson.KeyMap as AKM
 import Data.Aeson.Types (Parser)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (isNothing)
@@ -35,23 +36,34 @@ instance (FromJSON p) => FromJSON (PayloadWrapper p) where
       fieldNameMap s = s
 
 data ListDataField a = ListDataField
-  {fieldName :: String, fieldValue :: [a]}
+  { fieldName :: String,
+    fieldValue :: [a],
+    serverKnowledge :: Maybe Integer
+  }
   deriving (Eq, Show)
 
 instance (FromJSON a, PayloadItems a) => FromJSON (ListDataField a) where
   parseJSON = withObject "ListDataField" $ \v ->
-    parseItemList $
+    parseItemList (extractSK v) $
       filter (\(k, v) -> toString k `elem` validKeys) $ toList v
     where
+      -- extract server knowledge payload (Maybe Integer) and wrap it in a Parser context
+      extractSK :: Object -> Parser (Maybe Integer)
+      extractSK v = do
+        let maybePsk = fmap parseJSON (AKM.lookup "server_knowledge" v)
+        case maybePsk of
+          Nothing  -> pure Nothing
+          Just psk -> fmap Just psk
       -- NOTE: Need ScopedTypeVariable extension to work!
-      parseItemList :: [(Key, Value)] -> Parser (ListDataField a)
-      parseItemList ((k, v):_) = do
+      parseItemList :: Parser (Maybe Integer) -> [(Key, Value)] -> Parser (ListDataField a)
+      parseItemList sk ((k, v) : _) = do
         t <- parseJSON v :: Parser [a]
         let flags = fmap (`isKeyValid` toString k) t
         if and flags
-          then pure $ ListDataField (toString k) t
+          -- then pure $ ListDataField (toString k) t Nothing
+          then fmap (ListDataField (toString k) t) sk
           else fail $ "Invalid payload key (" <> toString k <> ")"
-      parseItemList xs = fail "Object should have at least one matched key-value pair"
+      parseItemList _ _ = fail "Object should have at least one matched key-value pair"
       validKeys :: [String]
       validKeys = ["budgets", "accounts", "payees"]
 

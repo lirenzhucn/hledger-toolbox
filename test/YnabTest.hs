@@ -28,9 +28,41 @@ dataTypeJsonTests =
         (decodeFromJSON actualFailedLDFJson3 :: Maybe (ListDataField Payee)) @?= Nothing,
       testCase "Account from JSON" $ decodeFromJSON actualAccJson @?= expectedAcc,
       testCase "Budget from JSON" $ decodeFromJSON actualBudgetJson @?= expectedBudget,
-      testCase "Payee from JSON" $ decodeFromJSON actualPayeeJson @?= expectedPayee
+      testCase "Payee from JSON" $ decodeFromJSON actualPayeeJson @?= expectedPayee,
+      testCase "Payee Payload from JSON" $
+        decodeFromJSON actualPayeePayloadJson
+          @?= expectedPayeePayload
     ]
   where
+    actualPayeePayloadJson =
+      "{\
+      \  \"data\": {\
+      \    \"payees\": [\
+      \      {\
+      \        \"id\": \"string\",\
+      \        \"name\": \"string\",\
+      \        \"transfer_account_id\": \"string\",\
+      \        \"deleted\": true\
+      \      }\
+      \    ],\
+      \    \"server_knowledge\": 0\
+      \  }\
+      \}"
+    expectedPayeePayload =
+      Just $
+        PayloadWrapper
+          { dataField =
+              ListDataField
+                "payees"
+                [ Payee
+                    { payee_id = "string",
+                      payee_name = "string",
+                      transfer_account_id = Just "string",
+                      payee_deleted = True
+                    }
+                ]
+                (Just 0)
+          }
     actualCFJson =
       "{\
       \    \"iso_code\": \"\",\
@@ -84,6 +116,7 @@ dataTypeJsonTests =
                 payee_deleted = False
               }
           ]
+          Nothing
     actualFailedLDFJson1 = "{\"field1\": [\"value1\"], \"field2\": [\"value2\"]}"
     actualFailedLDFJson2 = "{\"field\": 1}"
     -- payload key and data type mismatch
