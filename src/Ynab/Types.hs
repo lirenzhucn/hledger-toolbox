@@ -1,12 +1,16 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Ynab.Types where
 
 import Data.Aeson
+import Data.Aeson.Types (Parser)
 import Data.ByteString.Lazy (fromStrict)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
+import qualified Data.Text as Tx
 import Data.Text.Encoding (encodeUtf8)
 import Database.SQLite.Simple (Connection)
-import GHC.Generics (Generic)
+import GHC.Generics (Generic, Rep)
 import Network.HTTP.Req (Scheme (Https), Url)
 
 -- type class that can be used as a payload item in the following json structure
@@ -28,6 +32,30 @@ data CurrencyFormat = CurrencyFormat
   }
   deriving (Eq, Show, Generic, FromJSON, ToJSON)
 
+-- a helper function used by the FromJSON instances of various payload types
+parseJSONForPayloadTypes ::
+  (Generic a, GFromJSON Zero (Rep a)) =>
+  (String -> String) ->
+  Text ->
+  Value ->
+  Parser a
+parseJSONForPayloadTypes preMapper prefix =
+  genericParseJSON
+    defaultOptions
+      { omitNothingFields = True,
+        fieldLabelModifier = mapFieldName . preMapper
+      }
+  where
+    mapFieldName :: String -> String
+    mapFieldName s = camelTo2 '_' $ drop (Tx.length prefix) s
+
+parseJSONForPayloadTypes' ::
+  (Generic a, GFromJSON Zero (Rep a)) =>
+  Text ->
+  Value ->
+  Parser a
+parseJSONForPayloadTypes' = parseJSONForPayloadTypes id
+
 data Account = Account
   { accountId :: Text,
     accountDeleted :: Bool,
@@ -45,15 +73,7 @@ instance PayloadItems Account where
   isKeyValid _ k = k == "accounts"
 
 instance FromJSON Account where
-  parseJSON =
-    genericParseJSON
-      defaultOptions
-        { omitNothingFields = True,
-          fieldLabelModifier = accountMapFieldName
-        }
-    where
-      accountMapFieldName :: String -> String
-      accountMapFieldName s = camelTo2 '_' $ drop (length ("account" :: String)) s
+  parseJSON = parseJSONForPayloadTypes' "account"
 
 newtype DateFormat = DateFormat {format :: Text}
   deriving (Eq, Show, Generic, FromJSON)
@@ -65,16 +85,11 @@ instance PayloadItems Budget where
   isKeyValid _ k = k == "budgets"
 
 instance FromJSON Budget where
-  parseJSON =
-    genericParseJSON
-      defaultOptions
-        { omitNothingFields = True,
-          fieldLabelModifier = budgetMapFieldName
-        }
+  parseJSON = parseJSONForPayloadTypes preMapper "budget"
     where
-      budgetMapFieldName :: String -> String
-      budgetMapFieldName "budgetId_" = "id"
-      budgetMapFieldName s = camelTo2 '_' $ drop (length ("budget" :: String)) s
+      preMapper :: String -> String
+      preMapper "budgetId_" = "budgetId"
+      preMapper s = s
 
 data Payee = Payee
   { payeeId :: Text,
@@ -88,15 +103,22 @@ instance PayloadItems Payee where
   isKeyValid _ k = k == "payees"
 
 instance FromJSON Payee where
-  parseJSON =
-    genericParseJSON
-      defaultOptions
-        { omitNothingFields = True,
-          fieldLabelModifier = payeeMapFieldName
-        }
-    where
-      payeeMapFieldName :: String -> String
-      payeeMapFieldName s = camelTo2 '_' $ drop (length ("payee" :: String)) s
+  parseJSON = parseJSONForPayloadTypes' "payee"
+
+data Category = Category
+  { categoryId :: Text,
+    categoryDeleted :: Bool,
+    categoryCategoryGroupId :: Text,
+    categoryName :: Text,
+    categoryNote :: Maybe Text
+  }
+  deriving (Eq, Show, Generic)
+
+instance PayloadItems Category where
+  isKeyValid _ k = k == "categories"
+
+instance FromJSON Category where
+  parseJSON = parseJSONForPayloadTypes' "category"
 
 type Address = Text
 
