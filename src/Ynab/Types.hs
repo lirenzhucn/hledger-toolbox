@@ -37,11 +37,7 @@ data Account = Account
     accountClosed :: Bool,
     accountNote :: Maybe Text,
     accountBalance :: Int,
-    accountClearedBalance :: Int,
-    accountUnclearedBalance :: Int,
-    accountTransferPayeeId :: Text,
-    accountDirectImportLinked :: Bool,
-    accountDirectImportInError :: Bool
+    accountTransferPayeeId :: Text
   }
   deriving (Eq, Show, Generic)
 
@@ -62,16 +58,7 @@ instance FromJSON Account where
 newtype DateFormat = DateFormat {format :: Text}
   deriving (Eq, Show, Generic, FromJSON)
 
-data Budget = Budget
-  { budgetId_ :: Text,
-    budgetName :: Text,
-    budgetLastModifiedOn :: Text, -- TODO: should be date & time!!
-    budgetFirstMonth :: Text,
-    budgetLastMonth :: Text,
-    budgetDateFormat :: DateFormat,
-    budgetCurrencyFormat :: CurrencyFormat,
-    budgetAccounts :: Maybe [Account]
-  }
+data Budget = Budget {budgetId_ :: Text, budgetName :: Text}
   deriving (Eq, Show, Generic)
 
 instance PayloadItems Budget where

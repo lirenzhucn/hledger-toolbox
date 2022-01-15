@@ -144,18 +144,14 @@ dataTypeJsonTests =
       Just
         Account
           { accountBalance = -81699740,
-            accountClearedBalance = -81699740,
             accountClosed = False,
             accountDeleted = False,
-            accountDirectImportInError = False,
-            accountDirectImportLinked = False,
             accountId = "81d688b3-88d0-4663-ad8b-0446f0dbdb12",
             accountName = "ZHU Family Vault",
             accountNote = Just "#type=long_term_liability",
             accountOnBudget = False,
             accountTransferPayeeId = "76a2b19e-da78-4f7a-ba10-64fa67ca9eae",
-            accountType = "otherLiability",
-            accountUnclearedBalance = 0
+            accountType = "otherLiability"
           }
     actualBudgetJson =
       "{\
@@ -196,44 +192,7 @@ dataTypeJsonTests =
       \    ]\
       \}"
     expectedBudget =
-      Just
-        Budget
-          { budgetId_ = "string",
-            budgetName = "string",
-            budgetLastModifiedOn = "2022-01-06T02:56:18.374Z",
-            budgetFirstMonth = "string",
-            budgetLastMonth = "string",
-            budgetDateFormat = DateFormat {format = "string"},
-            budgetCurrencyFormat =
-              CurrencyFormat
-                { iso_code = "string",
-                  example_format = "string",
-                  decimal_digits = 0,
-                  decimal_separator = "string",
-                  symbol_first = True,
-                  group_separator = "string",
-                  currency_symbol = "string",
-                  display_symbol = True
-                },
-            budgetAccounts =
-              Just
-                [ Account
-                    { accountId = "string",
-                      accountName = "string",
-                      accountType = "checking",
-                      accountOnBudget = True,
-                      accountClosed = True,
-                      accountNote = Just "string",
-                      accountBalance = 0,
-                      accountClearedBalance = 0,
-                      accountUnclearedBalance = 0,
-                      accountTransferPayeeId = "string",
-                      accountDirectImportLinked = True,
-                      accountDirectImportInError = True,
-                      accountDeleted = True
-                    }
-                ]
-          }
+      Just Budget {budgetId_ = "string", budgetName = "string"}
     actualPayeeJson =
       "{\
       \    \"deleted\": false,\
