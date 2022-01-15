@@ -33,13 +33,13 @@ initEnv :: AppSettings -> IO AppEnv
 initEnv settings = do
   let url = fromMaybe defaultURL maybeURL
   budget <- getBudget settings url
-  let budgetId_ = budget_id budget
-  conn <- initDbConn ".secrets/dbs" (budget_id budget)
+  let _budgetId = budgetId_ budget
+  conn <- initDbConn ".secrets/dbs" (budgetId_ budget)
   pure
     AppEnv
       { appSettings = settings,
         baseURL = url,
-        budgetId = budgetId_,
+        budgetId = _budgetId,
         dbConn = conn
       }
   where

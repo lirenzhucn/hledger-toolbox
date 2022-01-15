@@ -14,7 +14,6 @@ work settings = do
   finally (runYnabApp doWork env) (closeDbConn $ dbConn env)
   where
     doWork = do
-      -- (accounts, sk) <- getAccountsApp Nothing
       (payees, sk) <- getPayeesApp Nothing
       liftIO $ putStrLn $ show payees
 

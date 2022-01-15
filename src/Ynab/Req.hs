@@ -98,7 +98,7 @@ getBudget appSettings baseURL = do
     [] -> throwM (InvalidPayloadData "budgets")
     (x : _) -> pure x
   where
-    validBudgets = filter (\b -> budget_name_ b == budget_name appSettings) . fieldValue
+    validBudgets = filter (\b -> budgetName b == budget_name appSettings) . fieldValue
 
 getItemList ::
   forall a.

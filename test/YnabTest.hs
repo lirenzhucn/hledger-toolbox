@@ -55,10 +55,10 @@ dataTypeJsonTests =
               ListDataField
                 "payees"
                 [ Payee
-                    { payee_id = "string",
-                      payee_name = "string",
-                      transfer_account_id = Just "string",
-                      payee_deleted = True
+                    { payeeId = "string",
+                      payeeName = "string",
+                      payeeTransferAccountId = Just "string",
+                      payeeDeleted = True
                     }
                 ]
                 (Just 0)
@@ -104,16 +104,16 @@ dataTypeJsonTests =
         ListDataField
           "payees"
           [ Payee
-              { payee_id = "123",
-                payee_name = "Amazon",
-                transfer_account_id = Nothing,
-                payee_deleted = False
+              { payeeId = "123",
+                payeeName = "Amazon",
+                payeeTransferAccountId = Nothing,
+                payeeDeleted = False
               },
             Payee
-              { payee_id = "456",
-                payee_name = "Costco",
-                transfer_account_id = Nothing,
-                payee_deleted = False
+              { payeeId = "456",
+                payeeName = "Costco",
+                payeeTransferAccountId = Nothing,
+                payeeDeleted = False
               }
           ]
           Nothing
@@ -143,19 +143,19 @@ dataTypeJsonTests =
     expectedAcc =
       Just
         Account
-          { balance = -81699740,
-            cleared_balance = -81699740,
-            closed = False,
-            account_deleted = False,
-            direct_import_in_error = False,
-            direct_import_linked = False,
-            account_id = "81d688b3-88d0-4663-ad8b-0446f0dbdb12",
-            account_name = "ZHU Family Vault",
-            note = Just "#type=long_term_liability",
-            on_budget = False,
-            transfer_payee_id = "76a2b19e-da78-4f7a-ba10-64fa67ca9eae",
-            type_ = "otherLiability",
-            uncleared_balance = 0
+          { accountBalance = -81699740,
+            accountClearedBalance = -81699740,
+            accountClosed = False,
+            accountDeleted = False,
+            accountDirectImportInError = False,
+            accountDirectImportLinked = False,
+            accountId = "81d688b3-88d0-4663-ad8b-0446f0dbdb12",
+            accountName = "ZHU Family Vault",
+            accountNote = Just "#type=long_term_liability",
+            accountOnBudget = False,
+            accountTransferPayeeId = "76a2b19e-da78-4f7a-ba10-64fa67ca9eae",
+            accountType = "otherLiability",
+            accountUnclearedBalance = 0
           }
     actualBudgetJson =
       "{\
@@ -198,13 +198,13 @@ dataTypeJsonTests =
     expectedBudget =
       Just
         Budget
-          { budget_id = "string",
-            budget_name_ = "string",
-            last_modified_on = "2022-01-06T02:56:18.374Z",
-            first_month = "string",
-            last_month = "string",
-            date_format = DateFormat {format = "string"},
-            currency_format =
+          { budgetId_ = "string",
+            budgetName = "string",
+            budgetLastModifiedOn = "2022-01-06T02:56:18.374Z",
+            budgetFirstMonth = "string",
+            budgetLastMonth = "string",
+            budgetDateFormat = DateFormat {format = "string"},
+            budgetCurrencyFormat =
               CurrencyFormat
                 { iso_code = "string",
                   example_format = "string",
@@ -215,22 +215,22 @@ dataTypeJsonTests =
                   currency_symbol = "string",
                   display_symbol = True
                 },
-            accounts =
+            budgetAccounts =
               Just
                 [ Account
-                    { account_id = "string",
-                      account_name = "string",
-                      type_ = "checking",
-                      on_budget = True,
-                      closed = True,
-                      note = Just "string",
-                      balance = 0,
-                      cleared_balance = 0,
-                      uncleared_balance = 0,
-                      transfer_payee_id = "string",
-                      direct_import_linked = True,
-                      direct_import_in_error = True,
-                      account_deleted = True
+                    { accountId = "string",
+                      accountName = "string",
+                      accountType = "checking",
+                      accountOnBudget = True,
+                      accountClosed = True,
+                      accountNote = Just "string",
+                      accountBalance = 0,
+                      accountClearedBalance = 0,
+                      accountUnclearedBalance = 0,
+                      accountTransferPayeeId = "string",
+                      accountDirectImportLinked = True,
+                      accountDirectImportInError = True,
+                      accountDeleted = True
                     }
                 ]
           }
@@ -244,8 +244,8 @@ dataTypeJsonTests =
     expectedPayee =
       Just
         Payee
-          { payee_id = "6662c233-c6f6-4938-b4e0-4223f93d62df",
-            payee_name = "Transfer : LZ PRI HOL",
-            payee_deleted = False,
-            transfer_account_id = Just "3e315021-8204-446b-b133-6c3c6c359719"
+          { payeeId = "6662c233-c6f6-4938-b4e0-4223f93d62df",
+            payeeName = "Transfer : LZ PRI HOL",
+            payeeDeleted = False,
+            payeeTransferAccountId = Just "3e315021-8204-446b-b133-6c3c6c359719"
           }

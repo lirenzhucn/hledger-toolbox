@@ -29,19 +29,19 @@ data CurrencyFormat = CurrencyFormat
   deriving (Eq, Show, Generic, FromJSON, ToJSON)
 
 data Account = Account
-  { account_id :: Text,
-    account_deleted :: Bool,
-    account_name :: Text,
-    type_ :: Text,
-    on_budget :: Bool,
-    closed :: Bool,
-    note :: Maybe Text,
-    balance :: Int,
-    cleared_balance :: Int,
-    uncleared_balance :: Int,
-    transfer_payee_id :: Text,
-    direct_import_linked :: Bool,
-    direct_import_in_error :: Bool
+  { accountId :: Text,
+    accountDeleted :: Bool,
+    accountName :: Text,
+    accountType :: Text,
+    accountOnBudget :: Bool,
+    accountClosed :: Bool,
+    accountNote :: Maybe Text,
+    accountBalance :: Int,
+    accountClearedBalance :: Int,
+    accountUnclearedBalance :: Int,
+    accountTransferPayeeId :: Text,
+    accountDirectImportLinked :: Bool,
+    accountDirectImportInError :: Bool
   }
   deriving (Eq, Show, Generic)
 
@@ -57,24 +57,20 @@ instance FromJSON Account where
         }
     where
       accountMapFieldName :: String -> String
-      accountMapFieldName "account_id" = "id"
-      accountMapFieldName "account_name" = "name"
-      accountMapFieldName "account_deleted" = "deleted"
-      accountMapFieldName "type_" = "type"
-      accountMapFieldName s = s
+      accountMapFieldName s = camelTo2 '_' $ drop (length ("account" :: String)) s
 
 newtype DateFormat = DateFormat {format :: Text}
   deriving (Eq, Show, Generic, FromJSON)
 
 data Budget = Budget
-  { budget_id :: Text,
-    budget_name_ :: Text,
-    last_modified_on :: Text, -- TODO: should be date & time!!
-    first_month :: Text,
-    last_month :: Text,
-    date_format :: DateFormat,
-    currency_format :: CurrencyFormat,
-    accounts :: Maybe [Account]
+  { budgetId_ :: Text,
+    budgetName :: Text,
+    budgetLastModifiedOn :: Text, -- TODO: should be date & time!!
+    budgetFirstMonth :: Text,
+    budgetLastMonth :: Text,
+    budgetDateFormat :: DateFormat,
+    budgetCurrencyFormat :: CurrencyFormat,
+    budgetAccounts :: Maybe [Account]
   }
   deriving (Eq, Show, Generic)
 
@@ -90,15 +86,14 @@ instance FromJSON Budget where
         }
     where
       budgetMapFieldName :: String -> String
-      budgetMapFieldName "budget_id" = "id"
-      budgetMapFieldName "budget_name_" = "name"
-      budgetMapFieldName s = s
+      budgetMapFieldName "budgetId_" = "id"
+      budgetMapFieldName s = camelTo2 '_' $ drop (length ("budget" :: String)) s
 
 data Payee = Payee
-  { payee_id :: Text,
-    payee_name :: Text,
-    transfer_account_id :: Maybe Text,
-    payee_deleted :: Bool
+  { payeeId :: Text,
+    payeeName :: Text,
+    payeeTransferAccountId :: Maybe Text,
+    payeeDeleted :: Bool
   }
   deriving (Eq, Show, Generic)
 
@@ -114,11 +109,7 @@ instance FromJSON Payee where
         }
     where
       payeeMapFieldName :: String -> String
-      payeeMapFieldName "payee_id" = "id"
-      payeeMapFieldName "payee_name" = "name"
-      payeeMapFieldName "payee_deleted" = "deleted"
-      payeeMapFieldName "type_" = "type"
-      payeeMapFieldName s = s
+      payeeMapFieldName s = camelTo2 '_' $ drop (length ("payee" :: String)) s
 
 type Address = Text
 
