@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Ynab.Req (getBudget, ListDataField (..), PayloadWrapper (..)) where
+module Ynab.Req (getItemList, getBudget, ListDataField (..), PayloadWrapper (..)) where
 
 import Control.Monad (when)
 import Control.Monad.Catch
@@ -52,7 +52,7 @@ instance (FromJSON a, PayloadItems a) => FromJSON (ListDataField a) where
       extractSK v = do
         let maybePsk = fmap parseJSON (AKM.lookup "server_knowledge" v)
         case maybePsk of
-          Nothing  -> pure Nothing
+          Nothing -> pure Nothing
           Just psk -> fmap Just psk
       -- NOTE: Need ScopedTypeVariable extension to work!
       parseItemList :: Parser (Maybe Integer) -> [(Key, Value)] -> Parser (ListDataField a)
@@ -60,8 +60,8 @@ instance (FromJSON a, PayloadItems a) => FromJSON (ListDataField a) where
         t <- parseJSON v :: Parser [a]
         let flags = fmap (`isKeyValid` toString k) t
         if and flags
-          -- then pure $ ListDataField (toString k) t Nothing
-          then fmap (ListDataField (toString k) t) sk
+          then -- then pure $ ListDataField (toString k) t Nothing
+            fmap (ListDataField (toString k) t) sk
           else fail $ "Invalid payload key (" <> toString k <> ")"
       parseItemList _ _ = fail "Object should have at least one matched key-value pair"
       validKeys :: [String]
@@ -100,20 +100,22 @@ getBudget appSettings baseURL = do
   where
     validBudgets = filter (\b -> budget_name_ b == budget_name appSettings) . fieldValue
 
--- getItemList ::
---   YnabApiSettings ->
---   Url 'Https ->
---   Text ->
---   Text ->
---   Text ->
---   Maybe Text ->
---   IO ([a], Text)
--- getItemList settings baseURL budgetId itemTypeName payloadKey maybeSK = do
---   let ep = baseURL /: "budgets" /: budgetId /: itemTypeName
---       request = buildWrappedGETRequest ep $ reqParams $ api_token settings
---   res <- responseBody <$> runReq defaultHttpConfig request
---   let items = dataField res
---   where
---     reqParams token = case maybeSK of
---       Nothing -> buildAuthHeader token
---       Just sk -> mconcat ["last_knowledge_of_server" =: sk, buildAuthHeader token]
+getItemList ::
+  forall a.
+  (FromJSON a, PayloadItems a) =>
+  YnabApiSettings ->
+  Url 'Https ->
+  Text ->
+  Text ->
+  Maybe Text ->
+  IO ([a], Text)
+getItemList settings baseURL budgetId itemTypeName maybeSK = do
+  let ep = baseURL /: "budgets" /: budgetId /: itemTypeName
+      request = buildWrappedGETRequest ep $ reqParams $ api_token settings
+  res <- responseBody <$> runReq defaultHttpConfig request
+  let listField = dataField res :: (ListDataField a)
+  pure (fieldValue listField, "")
+  where
+    reqParams token = case maybeSK of
+      Nothing -> buildAuthHeader token
+      Just sk -> mconcat ["last_knowledge_of_server" =: sk, buildAuthHeader token]

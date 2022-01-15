@@ -26,6 +26,7 @@ library
         Ynab.Db
         Ynab.Types
         Ynab.Req
+        Ynab.ReqApp
         Ynab.STExcept
 
     -- Modules included in this library but not exported.
@@ -70,6 +71,7 @@ executable ynab_import
     build-depends:
         base ^>=4.14,
         exceptions ^>=0.10,
+        mtl ^>=2.2,
         hledger-toolbox,
         text ^>= 1.2
 

@@ -143,5 +143,6 @@ decodeFromJSON content = decode $ fromStrict $ encodeUtf8 content
 data AppEnv = AppEnv
   { appSettings :: AppSettings,
     baseURL :: Url 'Https,
+    budgetId :: Text,
     dbConn :: Connection
   }
