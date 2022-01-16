@@ -4,6 +4,7 @@ module Ynab.Types where
 
 import Data.Aeson
 import Data.Aeson.Types (Parser)
+import qualified Data.Aeson.KeyMap as AKM
 import Data.ByteString.Lazy (fromStrict)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
@@ -114,11 +115,83 @@ data Category = Category
   }
   deriving (Eq, Show, Generic)
 
-instance PayloadItems Category where
-  isKeyValid _ k = k == "categories"
-
 instance FromJSON Category where
   parseJSON = parseJSONForPayloadTypes' "category"
+
+data CategoryGroup = CategoryGroup
+  { categoryGroupId :: Text,
+    categoryGroupDeleted :: Bool,
+    categoryGroupName :: Text,
+    categoryGroupCategories :: [Category]
+  }
+  deriving (Eq, Show, Generic)
+
+instance PayloadItems CategoryGroup where
+  isKeyValid _ k = k == "category_groups"
+
+instance FromJSON CategoryGroup where
+  parseJSON = parseJSONForPayloadTypes' "categoryGroup"
+
+data TransactionDetails = TransactionDetails
+  { tdId :: Text,
+    tdDeleted :: Bool,
+    tdAmount :: Int,
+    tdDate :: Maybe Text, -- TODO: should be a date type!
+    tdCleared :: Maybe Text,
+    tdApproved :: Maybe Bool,
+    tdAccountId :: Maybe Text,
+    tdAccountName :: Maybe Text,
+    tdPayeeId :: Maybe Text,
+    tdPayeeName :: Maybe Text,
+    tdCategoryId :: Maybe Text,
+    tdCategoryName :: Maybe Text,
+    tdTransferAccountId :: Maybe Text,
+    tdTransferTransactionId :: Maybe Text,
+    tdMemo :: Maybe Text
+  }
+  deriving (Eq, Show, Generic)
+
+instance FromJSON TransactionDetails where
+  parseJSON = parseJSONForPayloadTypes' "td"
+
+data SubTransaction = SubTransaction
+  { stTrDetails :: TransactionDetails,
+    stTransactionId :: Text
+  }
+  deriving (Eq, Show)
+
+instance FromJSON SubTransaction where
+  parseJSON val = do
+    td <- parseJSON val :: Parser TransactionDetails
+    trId <- withObject "SubTransaction" extractTrId val
+    pure SubTransaction {stTrDetails = td, stTransactionId = trId}
+    where
+      extractTrId :: Object -> Parser Text
+      extractTrId v = do
+        let maybeId = fmap parseJSON (AKM.lookup "transaction_id" v)
+        case maybeId of
+          Nothing  -> fail "A sub-transaction must have a transaction id"
+          Just id_ -> id_
+
+data Transaction = Transaction
+  { trDetails :: TransactionDetails, trSubTrans :: [SubTransaction] }
+  deriving (Eq, Show)
+
+instance PayloadItems Transaction where
+  isKeyValid _ k = k == "transactions"
+
+instance FromJSON Transaction where
+  parseJSON val = do
+    td <- parseJSON val :: Parser TransactionDetails
+    subTrans <- withObject "Transaction" extractSubTrans val
+    pure Transaction {trDetails = td, trSubTrans = subTrans}
+    where
+      extractSubTrans :: Object -> Parser [SubTransaction]
+      extractSubTrans v = do
+        let maybeSubTrans = fmap parseJSON (AKM.lookup "subtransactions" v)
+        case maybeSubTrans of
+          Nothing       -> pure []
+          Just subTrans -> subTrans
 
 type Address = Text
 
