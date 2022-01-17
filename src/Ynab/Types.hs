@@ -15,6 +15,7 @@ import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Tx
 import Data.Text.Encoding (encodeUtf8)
+import Data.Time.Calendar (Day)
 import Database.SQLite.Simple (Connection)
 import GHC.Generics (Generic, Rep)
 import Network.HTTP.Req (Scheme (Https), Url)
@@ -163,7 +164,7 @@ data TransactionDetails = TransactionDetails
   { tdId :: Text,
     tdDeleted :: Bool,
     tdAmount :: Int,
-    tdDate :: Maybe Text, -- TODO: should be a date type!
+    tdDate :: Maybe Day,
     tdCleared :: Maybe Text,
     tdApproved :: Maybe Bool,
     tdAccountId :: Maybe Text,

@@ -5,7 +5,8 @@ module Ynab where
 import Control.Monad.Logger (runStderrLoggingT, logInfoN)
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
 import Data.Maybe (fromMaybe)
-import Data.Text (Text)
+import Data.Text (Text, pack)
+import Data.Time (showGregorian)
 import Network.HTTP.Req (Scheme (Https), Url, https, useHttpsURI, (/:))
 import Text.URI (URI, mkURI)
 import TextShow (showt)
@@ -119,7 +120,7 @@ fetchData = do
         { trdId = tdId,
           trdDeleted = tdDeleted,
           trdAmount = tdAmount,
-          trdDate = fromMaybe "" tdDate,
+          trdDate = pack $ maybe "" showGregorian tdDate,
           trdCleared = fromMaybe "" tdCleared,
           trdApproved = fromMaybe True tdApproved,
           trdAccountId = fromMaybe "" tdAccountId,
