@@ -9,7 +9,7 @@ import Data.Aeson.Key (toString)
 import qualified Data.Aeson.KeyMap as AKM
 import Data.Aeson.Types (Parser)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (isNothing)
+import Data.Maybe (isNothing, fromMaybe)
 import Data.Proxy (Proxy)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
@@ -17,6 +17,7 @@ import GHC.Exts (IsList (toList))
 import GHC.Generics (Generic)
 import Network.HTTP.Req
 import Text.URI (URI, mkURI)
+import TextShow (showt)
 import Ynab.STExcept (YnabAPIException (..), rethrowReqException)
 import Ynab.Types
 
@@ -65,7 +66,7 @@ instance (FromJSON a, PayloadItems a) => FromJSON (ListDataField a) where
           else fail $ "Invalid payload key (" <> toString k <> ")"
       parseItemList _ _ = fail "Object should have at least one matched key-value pair"
       validKeys :: [String]
-      validKeys = ["budgets", "accounts", "payees"]
+      validKeys = ["budgets", "accounts", "payees", "category_groups", "transactions"]
 
 -- build authentication header
 buildAuthHeader :: Token -> Option schema
@@ -114,7 +115,7 @@ getItemList settings baseURL budgetId itemTypeName maybeSK = do
       request = buildWrappedGETRequest ep $ reqParams $ api_token settings
   res <- responseBody <$> runReq defaultHttpConfig request
   let listField = dataField res :: (ListDataField a)
-  pure (fieldValue listField, "")
+  pure (fieldValue listField, maybe "" showt (serverKnowledge listField))
   where
     reqParams token = case maybeSK of
       Nothing -> buildAuthHeader token

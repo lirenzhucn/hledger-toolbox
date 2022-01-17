@@ -5,17 +5,12 @@ import Control.Monad.Reader (MonadIO (liftIO))
 import qualified Data.Text.IO as TIO
 import Ynab
 import Ynab.Db
-import Ynab.ReqApp (getAccountsApp, getPayeesApp)
 import Ynab.Types
 
 work :: AppSettings -> IO ()
 work settings = do
   env <- initEnv settings
-  finally (runYnabApp doWork env) (closeDbConn $ dbConn env)
-  where
-    doWork = do
-      (payees, sk) <- getPayeesApp Nothing
-      liftIO $ putStrLn $ show payees
+  finally (runYnabApp fetchData env) (closeDbConn $ dbConn env)
 
 main :: IO ()
 main = do

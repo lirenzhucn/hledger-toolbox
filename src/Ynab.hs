@@ -1,30 +1,22 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Ynab where
 
-import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
-import Control.Monad.Reader (MonadIO, MonadReader, ReaderT (runReaderT))
+import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Network.HTTP.Req (Scheme (Https), Url, https, useHttpsURI, (/:))
 import Text.URI (URI, mkURI)
+import TextShow (showt)
 import Ynab.Db
-import Ynab.Req
+import Ynab.Req (getBudget)
+import Ynab.ReqApp
+  ( getAccountsApp,
+    getCategoryGroupsApp,
+    getPayeesApp,
+    getTransactionsApp,
+  )
 import Ynab.Types
-
-newtype YnabApp a = YnabApp
-  {runApp :: ReaderT AppEnv IO a}
-  deriving newtype
-    ( Functor,
-      Applicative,
-      Monad,
-      MonadIO,
-      MonadThrow,
-      MonadCatch,
-      MonadMask,
-      MonadReader AppEnv
-    )
 
 runYnabApp :: YnabApp a -> AppEnv -> IO a
 runYnabApp app = runReaderT (runApp app)
@@ -49,3 +41,94 @@ initEnv settings = do
 makeURL :: Text -> Maybe (Url 'Https)
 makeURL urlText =
   pure urlText >>= mkURI >>= useHttpsURI >>= (\(ep, _) -> Just ep)
+
+fetchData :: YnabApp ()
+fetchData = do
+  AppEnv {..} <- ask
+  -- get server knowledge
+  ServerKnowledgeSet {..} <- liftIO $ getServerKnowledgeFromDb dbConn
+  -- get info from endpoints
+  (accounts, skAccounts) <- getAccountsApp serverKnowledgeAccounts
+  (payees, skPayees) <- getPayeesApp serverKnowledgePayees
+  (categoryGroups, skCategoryGroups) <- getCategoryGroupsApp serverKnowledgeCategoryGroups
+  let categories = makeCategories categoryGroups
+  (transactions, skTransactions) <- getTransactionsApp serverKnowledgeTransactions
+  dbTrans <- makeDbTrans transactions
+  -- TODO: refactor logging
+  liftIO $ print $ showt (length accounts) <> " account(s) pulled"
+  liftIO $ print $ showt (length payees) <> " payee(s) pulled"
+  liftIO $ print $ showt (length categoryGroups) <> " category group(s) pulled"
+  liftIO $ print $ showt (length dbTrans) <> " transaction(s) pulled"
+  -- write everything to db
+  liftIO $ insertAccounts dbConn accounts
+  liftIO $ insertPayees dbConn payees
+  liftIO $ insertCategories dbConn categories
+  liftIO $ insertTransactions dbConn dbTrans
+  liftIO $
+    setServerKnowledgeToDb
+      dbConn
+      ServerKnowledgeSet
+        { serverKnowledgeAccounts = Just skAccounts,
+          serverKnowledgePayees = Just skPayees,
+          serverKnowledgeCategoryGroups = Just skCategoryGroups,
+          serverKnowledgeTransactions = Just skTransactions
+        }
+  --
+  pure ()
+  where
+    makeCategories :: [CategoryGroup] -> [Category]
+    makeCategories cgs =
+      foldl
+        ( \c0 cg ->
+            c0
+              ++ fmap
+                (fillCGName $ categoryGroupName cg)
+                (categoryGroupCategories cg)
+        )
+        []
+        cgs
+    fillCGName :: Text -> Category -> Category
+    fillCGName cgName c = c {categoryCategoryGroupName = Just cgName}
+    makeDbTrans :: [Transaction] -> YnabApp [TransactionDb]
+    makeDbTrans ts = do
+      pure $
+        foldl
+          ( \t0 t ->
+              t0 ++ [trToTrd (getChildrenIds t) (trDetails t)]
+                ++ fmap
+                  (trToTrd [] . replaceFields (trDetails t) . stTrDetails)
+                  (trSubTrans t)
+          )
+          []
+          ts
+    getChildrenIds :: Transaction -> [Text]
+    getChildrenIds trans = map (tdId . stTrDetails) (trSubTrans trans)
+    replaceFields :: TransactionDetails -> TransactionDetails -> TransactionDetails
+    replaceFields template target =
+      target
+        { tdDate = tdDate template,
+          tdCleared = tdCleared template,
+          tdApproved = tdApproved template,
+          tdAccountId = tdAccountId template,
+          tdAccountName = tdAccountName template
+        }
+    trToTrd :: [Text] -> TransactionDetails -> TransactionDb
+    trToTrd childrenIds TransactionDetails {..} =
+      TransactionDb
+        { trdId = tdId,
+          trdDeleted = tdDeleted,
+          trdAmount = tdAmount,
+          trdDate = fromMaybe "" tdDate,
+          trdCleared = fromMaybe "" tdCleared,
+          trdApproved = fromMaybe True tdApproved,
+          trdAccountId = fromMaybe "" tdAccountId,
+          trdAccountName = fromMaybe "" tdAccountName,
+          trdPayeeId = tdPayeeId,
+          trdPayeeName = tdPayeeName,
+          trdCategoryId = tdCategoryId,
+          trdCategoryName = tdCategoryName,
+          trdTransferAccountId = tdTransferAccountId,
+          trdTransferTransactionId = tdTransferTransactionId,
+          trdMemo = tdMemo,
+          trdChildrenIds = childrenIds
+        }

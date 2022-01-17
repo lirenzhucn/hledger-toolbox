@@ -1,7 +1,11 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Ynab.Types where
 
+import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
+import Control.Monad.Reader (MonadIO, MonadReader, ReaderT)
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import qualified Data.Aeson.KeyMap as AKM
@@ -77,7 +81,8 @@ instance FromJSON Account where
   parseJSON = parseJSONForPayloadTypes' "account"
 
 newtype DateFormat = DateFormat {format :: Text}
-  deriving (Eq, Show, Generic, FromJSON)
+  deriving (Eq, Show, Generic)
+  deriving anyclass FromJSON
 
 data Budget = Budget {budgetId_ :: Text, budgetName :: Text}
   deriving (Eq, Show, Generic)
@@ -110,6 +115,7 @@ data Category = Category
   { categoryId :: Text,
     categoryDeleted :: Bool,
     categoryCategoryGroupId :: Text,
+    categoryCategoryGroupName :: Maybe Text,
     categoryName :: Text,
     categoryNote :: Maybe Text
   }
@@ -131,6 +137,26 @@ instance PayloadItems CategoryGroup where
 
 instance FromJSON CategoryGroup where
   parseJSON = parseJSONForPayloadTypes' "categoryGroup"
+
+data TransactionDb = TransactionDb
+  { trdId :: Text,
+    trdDeleted :: Bool,
+    trdAmount :: Int,
+    trdDate :: Text,
+    trdCleared :: Text,
+    trdApproved :: Bool,
+    trdAccountId :: Text,
+    trdAccountName :: Text,
+    trdPayeeId :: Maybe Text,
+    trdPayeeName :: Maybe Text,
+    trdCategoryId :: Maybe Text,
+    trdCategoryName :: Maybe Text,
+    trdTransferAccountId :: Maybe Text,
+    trdTransferTransactionId :: Maybe Text,
+    trdMemo :: Maybe Text,
+    trdChildrenIds :: [Text]
+  }
+  deriving (Eq, Show)
 
 data TransactionDetails = TransactionDetails
   { tdId :: Text,
@@ -193,6 +219,14 @@ instance FromJSON Transaction where
           Nothing       -> pure []
           Just subTrans -> subTrans
 
+data ServerKnowledgeSet = ServerKnowledgeSet
+  { serverKnowledgeAccounts :: Maybe Text,
+    serverKnowledgePayees :: Maybe Text,
+    serverKnowledgeCategoryGroups :: Maybe Text,
+    serverKnowledgeTransactions :: Maybe Text
+  }
+  deriving (Eq, Show)
+
 type Address = Text
 
 type Token = Text
@@ -219,3 +253,16 @@ data AppEnv = AppEnv
     budgetId :: Text,
     dbConn :: Connection
   }
+
+newtype YnabApp a = YnabApp
+  {runApp :: ReaderT AppEnv IO a}
+  deriving newtype
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
+      MonadReader AppEnv
+    )

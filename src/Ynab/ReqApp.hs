@@ -1,11 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Ynab.ReqApp (getAccountsApp, getPayeesApp) where
+module Ynab.ReqApp
+  ( getAccountsApp,
+    getPayeesApp,
+    getCategoryGroupsApp,
+    getTransactionsApp,
+  )
+where
 
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask))
 import Data.Aeson (FromJSON)
 import Data.Text (Text)
-import Ynab (YnabApp)
 import Ynab.Req (getItemList)
 import Ynab.Types
 
@@ -20,3 +25,9 @@ getAccountsApp = getItemsApp "accounts"
 
 getPayeesApp :: Maybe Text -> YnabApp ([Payee], Text)
 getPayeesApp = getItemsApp "payees"
+
+getCategoryGroupsApp :: Maybe Text -> YnabApp ([CategoryGroup], Text)
+getCategoryGroupsApp = getItemsApp "categories"
+
+getTransactionsApp :: Maybe Text -> YnabApp ([Transaction], Text)
+getTransactionsApp = getItemsApp "transactions"
