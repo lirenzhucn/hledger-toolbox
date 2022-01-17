@@ -6,6 +6,7 @@ module Ynab.Types where
 
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Reader (MonadIO, MonadReader, ReaderT)
+import Control.Monad.Logger (LoggingT, MonadLogger)
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import qualified Data.Aeson.KeyMap as AKM
@@ -255,12 +256,13 @@ data AppEnv = AppEnv
   }
 
 newtype YnabApp a = YnabApp
-  {runApp :: ReaderT AppEnv IO a}
+  {runApp :: ReaderT AppEnv (LoggingT IO) a}
   deriving newtype
     ( Functor,
       Applicative,
       Monad,
       MonadIO,
+      MonadLogger,
       MonadThrow,
       MonadCatch,
       MonadMask,

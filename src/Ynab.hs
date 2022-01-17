@@ -2,6 +2,7 @@
 
 module Ynab where
 
+import Control.Monad.Logger (runStderrLoggingT, logInfoN)
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
@@ -19,7 +20,7 @@ import Ynab.ReqApp
 import Ynab.Types
 
 runYnabApp :: YnabApp a -> AppEnv -> IO a
-runYnabApp app = runReaderT (runApp app)
+runYnabApp app env = runStderrLoggingT (runReaderT (runApp app) env)
 
 initEnv :: AppSettings -> IO AppEnv
 initEnv settings = do
@@ -54,11 +55,11 @@ fetchData = do
   let categories = makeCategories categoryGroups
   (transactions, skTransactions) <- getTransactionsApp serverKnowledgeTransactions
   dbTrans <- makeDbTrans transactions
-  -- TODO: refactor logging
-  liftIO $ print $ showt (length accounts) <> " account(s) pulled"
-  liftIO $ print $ showt (length payees) <> " payee(s) pulled"
-  liftIO $ print $ showt (length categoryGroups) <> " category group(s) pulled"
-  liftIO $ print $ showt (length dbTrans) <> " transaction(s) pulled"
+  -- log number of entities pulled from API
+  logInfoN $ showt (length accounts) <> " account(s) pulled"
+  logInfoN $ showt (length payees) <> " payee(s) pulled"
+  logInfoN $ showt (length categoryGroups) <> " category group(s) pulled"
+  logInfoN $ showt (length dbTrans) <> " transaction(s) pulled"
   -- write everything to db
   liftIO $ insertAccounts dbConn accounts
   liftIO $ insertPayees dbConn payees
