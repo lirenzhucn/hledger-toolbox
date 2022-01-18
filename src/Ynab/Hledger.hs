@@ -76,14 +76,14 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
       tdate2 = Nothing,
       tstatus = mkStatus trdCleared,
       tcode = "",
-      tdescription = fromMaybe "" trdMemo,
+      tdescription = mkDesc trdPayeeName trdMemo,
       tcomment = "",
       ttags = [],
       tpostings =
         [ Posting
             { pdate = Nothing,
               pdate2 = Nothing,
-              pstatus = mkStatus trdCleared,
+              pstatus = Unmarked,
               paccount = cAccountMapper trdAccountName,
               pamount = Mixed (fromList [(MixedAmountKeyNoPrice "$", transAmount)]),
               pcomment = "",
@@ -96,7 +96,7 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
           Posting
             { pdate = Nothing,
               pdate2 = Nothing,
-              pstatus = mkStatus trdCleared,
+              pstatus = Unmarked,
               paccount = mkAccount2,
               pamount = Mixed (fromList [(MixedAmountKeyNoPrice "$", negTransAmount)]),
               pcomment = "",
@@ -119,8 +119,13 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
     defaultSourcePosPair =
       (SourcePos "" (mkPos 1) (mkPos 1), SourcePos "" (mkPos 2) (mkPos 1))
     --
+    mkDesc (Just payee) (Just memo) = payee <> " | " <> memo
+    mkDesc Nothing (Just memo) = memo
+    mkDesc (Just payee) Nothing = payee
+    mkDesc Nothing Nothing = ""
+    --
     mkStatus "cleared" = Cleared
-    mkStatus "approved" = Cleared
+    mkStatus "reconciled" = Cleared
     mkStatus _ = Pending
     --
     isPayeeStartingBalance (Just s) = T.isPrefixOf "starting balance" (T.toLower s)

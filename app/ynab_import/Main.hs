@@ -10,7 +10,9 @@ import Ynab.Types
 work :: AppSettings -> IO ()
 work settings = do
   env <- initEnv settings
-  finally (runYnabApp fetchData env) (closeDbConn $ dbConn env)
+  finally (runYnabApp doWork env) (closeDbConn $ dbConn env)
+  where
+    doWork = fetchData >> writeJournal
 
 main :: IO ()
 main = do

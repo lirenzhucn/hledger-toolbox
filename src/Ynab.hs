@@ -2,15 +2,19 @@
 
 module Ynab where
 
-import Control.Monad.Logger (runStderrLoggingT, logInfoN)
+import Control.Monad.Logger (logInfoN, runStderrLoggingT)
 import Control.Monad.Reader (MonadIO (liftIO), MonadReader (ask), ReaderT (runReaderT))
+import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Data.Text (Text, pack)
+import qualified Data.Text.Lazy.IO as TIO
 import Data.Time (showGregorian)
+import Data.Time.Clock.POSIX (getPOSIXTime)
 import Network.HTTP.Req (Scheme (Https), Url, https, useHttpsURI, (/:))
 import Text.URI (URI, mkURI)
 import TextShow (showt)
 import Ynab.Db
+import Ynab.Hledger (MakeJournalConfig (..), makeJournal)
 import Ynab.Req (getBudget)
 import Ynab.ReqApp
   ( getAccountsApp,
@@ -19,6 +23,7 @@ import Ynab.ReqApp
     getTransactionsApp,
   )
 import Ynab.Types
+import Hledger.Utils.Render (renderJournal)
 
 runYnabApp :: YnabApp a -> AppEnv -> IO a
 runYnabApp app env = runStderrLoggingT (runReaderT (runApp app) env)
@@ -138,4 +143,28 @@ fetchData = do
 writeJournal :: YnabApp ()
 writeJournal = do
   AppEnv {..} <- ask
+  allTrans <- liftIO $ getAllTransactions dbConn
+  allCategories <- liftIO $ getAllCategories dbConn
+  currTime <- liftIO $ getPOSIXTime
+  let categoryToGroup =
+        M.fromList
+          [ ( categoryName c,
+              fromMaybe "Unknown Group" (categoryCategoryGroupName c)
+            )
+            | c <- allCategories
+          ]
+      config =
+        MakeJournalConfig
+          { cLastRead = currTime,
+            cAccountMapper = accmap appSettings,
+            cCategoryMapper = catmap categoryToGroup,
+            cTransferAccount = transfer_account appSettings,
+            cStartingBalanceAccount = starting_balance_account appSettings
+          }
+      journal = makeJournal config allTrans
+  liftIO $ TIO.putStr $ renderJournal journal
   pure ()
+  where
+    accmap settings acc = fromMaybe "" (M.lookup acc (account_map settings))
+    catmap m (Just c) = fromMaybe "Unknown Group" (M.lookup c m)
+    catmap _ Nothing = "Unknown Group"

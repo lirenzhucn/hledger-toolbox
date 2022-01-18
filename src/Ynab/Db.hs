@@ -22,6 +22,7 @@ import Database.SQLite.Simple
     open,
     query_,
   )
+import Database.SQLite.Simple.FromRow (FromRow (..), RowParser, field)
 import Database.SQLite.Simple.ToRow (ToRow (..))
 import System.Directory (doesFileExist)
 import System.FilePath (FilePath, (<.>), (</>))
@@ -190,12 +191,29 @@ instance ToRow Category where
       SQLText $ fromMaybe "" categoryCategoryGroupName
     ]
 
+instance FromRow Category where
+  fromRow :: RowParser Category
+  fromRow =
+    Category
+      <$> field
+      <*> field
+      <*> field
+      <*> (toMaybeText <$> field)
+      <*> field
+      <*> (toMaybeText <$> field)
+
 insertCategories :: Connection -> [Category] -> IO ()
 insertCategories =
   flip
     executeMany
     "INSERT OR REPLACE INTO categories (id, deleted, name, note, group_id, \
     \group_name) VALUES (?,?,?,?,?,?)"
+
+getAllCategories :: Connection -> IO [Category]
+getAllCategories =
+  flip
+    query_
+    "SELECT id, deleted, name, note, group_id, group_name from categories"
 
 instance ToRow TransactionDb where
   toRow :: TransactionDb -> [SQLData]
@@ -218,11 +236,45 @@ instance ToRow TransactionDb where
       SQLText $ Tx.unwords trdChildrenIds
     ]
 
+instance FromRow TransactionDb where
+  fromRow :: RowParser TransactionDb
+  fromRow =
+    TransactionDb
+      <$> field
+      <*> field
+      <*> field
+      <*> field
+      <*> field
+      <*> field
+      <*> field
+      <*> field
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (toMaybeText <$> field)
+      <*> (Tx.words <$> field)
+
 insertTransactions :: Connection -> [TransactionDb] -> IO ()
 insertTransactions =
-  flip 
+  flip
     executeMany
     "INSERT OR REPLACE INTO transactions (id, deleted, amount, date, cleared, \
     \approved, account_id, account_name, payee_id, payee_name, category_id, \
     \category_name, transfer_account_id, transfer_transaction_id, memo, \
     \children) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
+getAllTransactions :: Connection -> IO [TransactionDb]
+getAllTransactions =
+  flip
+    query_
+    "SELECT id, deleted, amount, date, cleared, approved, account_id, \
+    \account_name, payee_id, payee_name, category_id, category_name, \
+    \transfer_account_id, transfer_transaction_id, memo, children FROM \
+    \transactions ORDER BY date"
+
+toMaybeText :: Text -> Maybe Text
+toMaybeText "" = Nothing
+toMaybeText s = Just s

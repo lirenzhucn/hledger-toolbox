@@ -116,10 +116,10 @@ instance FromJSON Payee where
 data Category = Category
   { categoryId :: Text,
     categoryDeleted :: Bool,
-    categoryCategoryGroupId :: Text,
-    categoryCategoryGroupName :: Maybe Text,
     categoryName :: Text,
-    categoryNote :: Maybe Text
+    categoryNote :: Maybe Text,
+    categoryCategoryGroupId :: Text,
+    categoryCategoryGroupName :: Maybe Text
   }
   deriving (Eq, Show, Generic)
 
