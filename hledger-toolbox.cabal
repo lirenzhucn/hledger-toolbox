@@ -98,4 +98,5 @@ test-suite hledger-toolbox-test
         hledger-toolbox,
         tasty ^>=1.4.2.1,
         tasty-hunit ^>=0.10.0.3,
-        text ^>= 1.2
+        text ^>= 1.2,
+        time ^>=1.9.3

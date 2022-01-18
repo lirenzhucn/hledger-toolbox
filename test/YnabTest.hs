@@ -3,6 +3,7 @@ module Main (main) where
 import Data.Aeson (FromJSON, decode)
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Encoding (encodeUtf8)
+import Data.Time.Calendar (Day, fromGregorian)
 import Test.Tasty
 import Test.Tasty.HUnit
 import Ynab.Req
@@ -26,7 +27,7 @@ transactionJsonTests =
     actualTransJson0 =
       "{\
       \  \"id\": \"string\",\
-      \  \"date\": \"string\",\
+      \  \"date\": \"2020-01-01\",\
       \  \"amount\": 0,\
       \  \"memo\": \"string\",\
       \  \"cleared\": \"cleared\",\
@@ -53,7 +54,7 @@ transactionJsonTests =
                 { tdId = "string",
                   tdDeleted = True,
                   tdAmount = 0,
-                  tdDate = Just "string",
+                  tdDate = Just $ fromGregorian 2020 1 1,
                   tdCleared = Just "cleared",
                   tdApproved = Just True,
                   tdAccountId = Just "string",
@@ -71,7 +72,7 @@ transactionJsonTests =
     actualTransJson1 =
       "{\
       \  \"id\": \"string\",\
-      \  \"date\": \"string\",\
+      \  \"date\": \"2020-01-01\",\
       \  \"amount\": 0,\
       \  \"memo\": \"string\",\
       \  \"cleared\": \"cleared\",\
@@ -112,7 +113,7 @@ transactionJsonTests =
                 { tdId = "string",
                   tdDeleted = True,
                   tdAmount = 0,
-                  tdDate = Just "string",
+                  tdDate = Just $ fromGregorian 2020 1 1,
                   tdCleared = Just "cleared",
                   tdApproved = Just True,
                   tdAccountId = Just "string",
