@@ -134,3 +134,8 @@ fetchData = do
           trdMemo = tdMemo,
           trdChildrenIds = childrenIds
         }
+
+writeJournal :: YnabApp ()
+writeJournal = do
+  AppEnv {..} <- ask
+  pure ()

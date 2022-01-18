@@ -22,8 +22,10 @@ extra-source-files:
 
 library
     exposed-modules:
+        Hledger.Utils.Render
         Ynab
         Ynab.Db
+        Ynab.Hledger
         Ynab.Types
         Ynab.Req
         Ynab.ReqApp
@@ -41,6 +43,7 @@ library
         DeriveGeneric
         DataKinds
     build-depends:
+        Decimal >=0.5.1,
         aeson ^>=2.0,
         base ^>=4.14,
         bytestring ^>= 0.10.12,
