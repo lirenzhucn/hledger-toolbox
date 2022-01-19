@@ -68,7 +68,8 @@ executable ynab_import
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:
+        Params
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -79,6 +80,8 @@ executable ynab_import
         exceptions ^>=0.10,
         mtl ^>=2.2,
         hledger-toolbox,
+        hledger-lib ^>= 1.24,
+        optparse-applicative ^>=0.16.1,
         text ^>= 1.2
 
     hs-source-dirs:   app/ynab_import

@@ -7,17 +7,22 @@ import Ynab
 import Ynab.Db
 import Ynab.Types
 
-work :: AppSettings -> IO ()
-work settings = do
-  env <- initEnv settings
+import Params (Params (..), cliParser)
+
+work :: Params -> AppSettings -> IO ()
+work params settings = do
+  env <- initEnv (dbDir params) settings
   finally (runYnabApp doWork env) (closeDbConn $ dbConn env)
   where
-    doWork = fetchData >> writeJournal
+    doWork
+     | noPullData params = writeJournal (outputFile params)
+     | otherwise = fetchData >> writeJournal (outputFile params)
 
 main :: IO ()
 main = do
-  content <- TIO.readFile "./.secrets/ynab_api_import_settings.json"
+  params <- cliParser
+  content <- TIO.readFile $ settingsFile params
   let maybeSettings = (decodeFromJSON content :: Maybe AppSettings)
   case maybeSettings of
     Nothing -> putStrLn "Failed to parse settings"
-    Just settings -> work settings
+    Just settings -> work params settings

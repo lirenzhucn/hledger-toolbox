@@ -28,12 +28,12 @@ import Hledger.Utils.Render (renderJournal)
 runYnabApp :: YnabApp a -> AppEnv -> IO a
 runYnabApp app env = runStderrLoggingT (runReaderT (runApp app) env)
 
-initEnv :: AppSettings -> IO AppEnv
-initEnv settings = do
+initEnv :: FilePath -> AppSettings -> IO AppEnv
+initEnv dbDir settings = do
   let url = fromMaybe defaultURL maybeURL
   budget <- getBudget settings url
   let _budgetId = budgetId_ budget
-  conn <- initDbConn ".secrets/dbs" (budgetId_ budget)
+  conn <- initDbConn dbDir (budgetId_ budget)
   pure
     AppEnv
       { appSettings = settings,
@@ -140,12 +140,12 @@ fetchData = do
           trdChildrenIds = childrenIds
         }
 
-writeJournal :: YnabApp ()
-writeJournal = do
+writeJournal :: FilePath -> YnabApp ()
+writeJournal outputFile = do
   AppEnv {..} <- ask
   allTrans <- liftIO $ getAllTransactions dbConn
   allCategories <- liftIO $ getAllCategories dbConn
-  currTime <- liftIO $ getPOSIXTime
+  currTime <- liftIO getPOSIXTime
   let categoryToGroup =
         M.fromList
           [ ( categoryName c,
@@ -162,9 +162,12 @@ writeJournal = do
             cStartingBalanceAccount = starting_balance_account appSettings
           }
       journal = makeJournal config allTrans
-  liftIO $ TIO.putStr $ renderJournal journal
+  liftIO $ writeFile_ outputFile $ renderJournal journal
   pure ()
   where
     accmap settings acc = fromMaybe "" (M.lookup acc (account_map settings))
     catmap m (Just c) = fromMaybe "Unknown Group" (M.lookup c m)
     catmap _ Nothing = "Unknown Group"
+    --
+    writeFile_ "-" = TIO.putStr
+    writeFile_ f = TIO.writeFile f
