@@ -94,6 +94,7 @@ test-suite hledger-toolbox-test
     main-is:          YnabTest.hs
     other-modules:
         YnabTypesJsonTest
+        YnabDbTest
     default-extensions:
         OverloadedStrings
     build-depends:
@@ -101,6 +102,7 @@ test-suite hledger-toolbox-test
         base ^>=4.14,
         bytestring ^>=0.10.12.0,
         hledger-toolbox,
+        sqlite-simple ^>=0.4.18,
         tasty ^>=1.4.2.1,
         tasty-hunit ^>=0.10.0.3,
         text ^>= 1.2,

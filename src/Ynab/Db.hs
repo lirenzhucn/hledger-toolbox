@@ -123,6 +123,7 @@ getServerKnowledgeFromDb conn = do
         $ Query ("SELECT value FROM server_knowledge WHERE type_='" <> type_ <> "'")
     rowsToSK :: [Only Text] -> Maybe Text
     rowsToSK [] = Nothing
+    rowsToSK ((Only "") : _) = Nothing
     rowsToSK ((Only x) : _) = Just x
 
 setServerKnowledgeToDb :: Connection -> ServerKnowledgeSet -> IO ()

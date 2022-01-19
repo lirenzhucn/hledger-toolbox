@@ -160,6 +160,26 @@ data TransactionDb = TransactionDb
   }
   deriving (Eq, Show)
 
+transactionDb :: TransactionDb
+transactionDb = TransactionDb
+  { trdId = "",
+    trdDeleted = False,
+    trdAmount = 0,
+    trdDate = "2020-01-01",
+    trdCleared = "reconciled",
+    trdApproved = True,
+    trdAccountId = "",
+    trdAccountName = "",
+    trdPayeeId = Nothing,
+    trdPayeeName = Nothing,
+    trdCategoryId = Nothing,
+    trdCategoryName = Nothing,
+    trdTransferAccountId = Nothing,
+    trdTransferTransactionId = Nothing,
+    trdMemo = Nothing,
+    trdChildrenIds = []
+  }
+
 data TransactionDetails = TransactionDetails
   { tdId :: Text,
     tdDeleted :: Bool,
