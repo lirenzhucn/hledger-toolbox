@@ -92,6 +92,8 @@ test-suite hledger-toolbox-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          YnabTest.hs
+    other-modules:
+        YnabTypesJsonTest
     default-extensions:
         OverloadedStrings
     build-depends:
