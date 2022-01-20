@@ -10,11 +10,9 @@ import Control.Monad.Logger (LoggingT, MonadLogger)
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import qualified Data.Aeson.KeyMap as AKM
-import Data.ByteString.Lazy (fromStrict)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Tx
-import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Calendar (Day)
 import Database.SQLite.Simple (Connection)
 import GHC.Generics (Generic, Rep)
@@ -265,9 +263,6 @@ data AppSettings = AppSettings
     account_map :: Map.Map Text Text
   }
   deriving (Eq, Show, Generic, FromJSON)
-
-decodeFromJSON :: FromJSON a => Text -> Maybe a
-decodeFromJSON content = decode $ fromStrict $ encodeUtf8 content
 
 data AppEnv = AppEnv
   { appSettings :: AppSettings,
