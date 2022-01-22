@@ -47,10 +47,10 @@ extractPosting PostingConfig {..} content =
           poriginal = Nothing
         })
 
-checkDateExtractor :: ParseTime t => Text -> Text -> t
-checkDateExtractor pattern content =
+checkDateExtractor :: ParseTime t => Text -> Text -> Text -> t
+checkDateExtractor pattern dateFormat content =
   let dateText = head $ mrSubList (content =~ pattern :: MatchResult Text) in
-    parseTimeOrError True defaultTimeLocale "%m-%d-%Y" $ unpack dateText
+    parseTimeOrError True defaultTimeLocale (unpack dateFormat) (unpack dateText)
 
 buildTransDesc :: GlobalConfig -> Text -> Text
 buildTransDesc GlobalConfig {..} content =
@@ -71,7 +71,7 @@ makeTransaction AppSettings {..} content =
     { tindex = 0,
       tprecedingcomment = "",
       tsourcepos = defaultSourcePosPair,
-      tdate = checkDateExtractor (gcCheckDate asGlobal) content,
+      tdate = checkDateExtractor (gcCheckDate asGlobal) (gcDateFormat asGlobal) content,
       tdate2 = Nothing,
       tstatus = Cleared,
       tcode = "",

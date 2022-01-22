@@ -78,6 +78,7 @@ executable paycheck_import
     default-extensions:
         OverloadedStrings
     build-depends:
+        Glob ^>=0.10.2,
         base ^>=4.14,
         hledger-toolbox,
         hledger-lib ^>= 1.24,

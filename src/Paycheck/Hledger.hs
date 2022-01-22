@@ -16,8 +16,8 @@ import Hledger
 import Paycheck.Parser (makeTransaction)
 import Paycheck.Types
 
-makeJournal :: POSIXTime -> AppSettings -> Text -> Journal
-makeJournal lastRead settings content =
+makeJournal :: POSIXTime -> AppSettings -> [Text] -> Journal
+makeJournal lastRead settings contents =
   Journal
     { jparsedefaultyear = Nothing,
       jparsedefaultcommodity = Nothing,
@@ -42,6 +42,6 @@ makeJournal lastRead settings content =
       jlastreadtime = lastRead
     }
   where
-    mkTrans = [ makeTransaction settings content ]
+    mkTrans = map (makeTransaction settings) contents
     defaultSourcePosPair =
       (SourcePos "" (mkPos 1) (mkPos 1), SourcePos "" (mkPos 2) (mkPos 1))

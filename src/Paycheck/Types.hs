@@ -27,6 +27,7 @@ data GlobalConfig = GlobalConfig
     gcEmployerName :: Text,
     gcCheckDate :: Text,
     gcCheckNumber :: Text,
+    gcDateFormat :: Text,
     gcTransDesc :: Text
   }
   deriving (Eq, Show, Generic)
