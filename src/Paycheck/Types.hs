@@ -8,7 +8,7 @@ import Text.Regex.Base
 import Text.Regex.PCRE ((=~))
 
 data PostingConfig = PostingConfig
-  { pcAccount2 :: Text,
+  { pcAccount :: Text,
     pcPattern :: Text,
     pcAmount :: Text
   }
@@ -22,7 +22,13 @@ instance FromJSON PostingConfig where
           fieldLabelModifier = (camelTo2 '_') . (drop 2)
         }
 
-newtype GlobalConfig = GlobalConfig { gcAccount1 :: Text }
+data GlobalConfig = GlobalConfig
+  { gcRecipientName :: Text,
+    gcEmployerName :: Text,
+    gcCheckDate :: Text,
+    gcCheckNumber :: Text,
+    gcTransDesc :: Text
+  }
   deriving (Eq, Show, Generic)
 
 instance FromJSON GlobalConfig where
