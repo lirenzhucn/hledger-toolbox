@@ -19,7 +19,8 @@ readPdfOrTxt pdftotextBin fpath = do
   when (takeExtension fpath /= ".txt") $
     callProcess pdftotextBin ["-layout", fpath]
   res <- TIO.readFile txtPath
-  removeFile txtPath
+  when (takeExtension fpath /= ".txt") $
+    removeFile txtPath
   pure res
 
 readPdfOrTxt_ :: FilePath -> IO Text

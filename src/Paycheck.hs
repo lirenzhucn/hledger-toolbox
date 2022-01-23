@@ -7,7 +7,7 @@ import qualified Data.Text.IO as TIO
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Hledger (BalancingOpts (..), Journal)
 import Hledger.Data.Balancing (journalBalanceTransactions)
-import System.FilePath.Glob (compile, globDir1)
+import System.FilePath.Glob (compile, globDir)
 import TextShow (showtList)
 
 import Hledger.Utils.Render (renderJournal)
@@ -22,7 +22,7 @@ parsePaychecksApp :: FilePath -> PaycheckApp Journal
 parsePaychecksApp inputDir = do
   settings <- ask
   currTime <- liftIO getPOSIXTime
-  inputFiles <- liftIO $ globDir1 (compile "*.pdf") inputDir
+  inputFiles <- liftIO $ fmap concat (globDir (map compile ["*.pdf", "*.txt"]) inputDir)
   logFilesFound inputFiles
   contents <- liftIO $ mapM readPdfOrTxt_ inputFiles
   pure $ makeJournal currTime settings contents
