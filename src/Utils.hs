@@ -6,6 +6,7 @@ import Data.ByteString.Lazy (fromStrict)
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import Data.Text.Encoding (encodeUtf8)
+import System.Directory (removeFile)
 import System.FilePath.Posix (dropExtension, takeExtension)
 import System.Process (callProcess)
 
@@ -14,9 +15,12 @@ decodeFromJSON = decode . fromStrict . encodeUtf8
 
 readPdfOrTxt :: FilePath -> FilePath -> IO Text
 readPdfOrTxt pdftotextBin fpath = do
+  let txtPath = dropExtension fpath ++ (".txt" :: FilePath)
   when (takeExtension fpath /= ".txt") $
     callProcess pdftotextBin ["-layout", fpath]
-  TIO.readFile $ dropExtension fpath ++ (".txt" :: FilePath)
+  res <- TIO.readFile txtPath
+  removeFile txtPath
+  pure res
 
 readPdfOrTxt_ :: FilePath -> IO Text
 readPdfOrTxt_ = readPdfOrTxt "pdftotext"
