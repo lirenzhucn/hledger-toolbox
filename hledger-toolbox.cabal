@@ -113,10 +113,10 @@ executable ynab_import
     hs-source-dirs:   app/ynab_import
     default-language: Haskell2010
 
-test-suite hledger-toolbox-test
+test-suite ynab-lib-test
     default-language: Haskell2010
     type:             exitcode-stdio-1.0
-    hs-source-dirs:   tests
+    hs-source-dirs:   tests/Ynab
     main-is:          YnabTest.hs
     other-modules:
         YnabTypesJsonTest
