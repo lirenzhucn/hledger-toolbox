@@ -22,10 +22,9 @@ parsePaychecksApp :: FilePath -> PaycheckApp Journal
 parsePaychecksApp inputDir = do
   settings <- ask
   currTime <- liftIO getPOSIXTime
-  contents <- pure inputDir >>=
-    (\v -> liftIO $ globDir1 (compile "*.pdf") v) >>=
-      logFilesFound >>=
-        (\v -> liftIO $ mapM readPdfOrTxt_ v)
+  inputFiles <- liftIO $ globDir1 (compile "*.pdf") inputDir
+  logFilesFound inputFiles
+  contents <- liftIO $ mapM readPdfOrTxt_ inputFiles
   pure $ makeJournal currTime settings contents
   where
     logFilesFound :: [FilePath] -> PaycheckApp [FilePath]
