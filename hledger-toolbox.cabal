@@ -23,6 +23,11 @@ extra-source-files:
 library
     exposed-modules:
         Hledger.Utils.Render
+        Paycheck
+        Paycheck.Hledger
+        Paycheck.Parser
+        Paycheck.Types
+        Utils
         Ynab
         Ynab.Db
         Ynab.Hledger
@@ -44,6 +49,7 @@ library
         DataKinds
     build-depends:
         Decimal >=0.5.1,
+        Glob ^>=0.10.2,
         aeson ^>=2.0,
         base ^>=4.14,
         bytestring ^>= 0.10.12,
@@ -55,6 +61,9 @@ library
         modern-uri ^>=0.3.4,
         monad-logger ^>=0.3.36,
         mtl ^>=2.2,
+        process ^>=1.6.13,
+        regex-base ^>=0.94.0,
+        regex-pcre-builtin ^>=0.95.2,
         req ^>=3.9.2,
         sqlite-simple ^>=0.4.18,
         text ^>= 1.2,
@@ -62,6 +71,23 @@ library
         time ^>=1.9.3,
         hledger-lib ^>= 1.24
     hs-source-dirs:   src
+    default-language: Haskell2010
+
+executable paycheck_import
+    main-is: Main.hs
+    other-modules:
+        Params
+    default-extensions:
+        OverloadedStrings
+    build-depends:
+        Glob ^>=0.10.2,
+        base ^>=4.14,
+        hledger-toolbox,
+        hledger-lib ^>= 1.24,
+        optparse-applicative ^>=0.16.1,
+        text ^>= 1.2,
+        time ^>=1.9.3
+    hs-source-dirs:   app/paycheck_import
     default-language: Haskell2010
 
 executable ynab_import
@@ -87,10 +113,10 @@ executable ynab_import
     hs-source-dirs:   app/ynab_import
     default-language: Haskell2010
 
-test-suite hledger-toolbox-test
+test-suite ynab-lib-test
     default-language: Haskell2010
     type:             exitcode-stdio-1.0
-    hs-source-dirs:   tests
+    hs-source-dirs:   tests/Ynab
     main-is:          YnabTest.hs
     other-modules:
         YnabTypesJsonTest

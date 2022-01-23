@@ -1,0 +1,118 @@
+{
+    "global" : {
+        "recipient_name": "\\s+(Jane Doe)\\s+",
+        "employer_name": "\\s+(LinkedIn)\\s+",
+        "check_date": "\\s+Check Date:\\s+(\\d{2}.\\d{2}.\\d{4})",
+        "check_number": "\\s+Pers. No\\s+(\\d+)",
+        "date_format": "%d.%m.%Y",
+        "trans_desc": "${recipient_name} paycheck (${check_number}) from ${employer_name} on ${check_date}"
+    },
+    "postings" : [
+        {
+            "account": "revenues:income:ws:salary",
+            "pattern": "\\s+Salary Exempt\\s+\\d+\\.{0,1}\\d*\\s+([\\d,]+\\.{0,1}\\d*)\\s+[\\d,]+\\.{0,1}\\d*",
+            "amount": "-$1"
+        },
+        {
+            "account": "revenues:income:ws:salary",
+            "pattern": "\\s+Recog Award-NC Tax\\s+([\\d,]+\\.{0,1}\\d*)\\s+[\\d,]+\\.{0,1}\\d*",
+            "amount": "-$1"
+        },
+        {
+            "account": "expenses:Taxes:Federal Income Tax",
+            "pattern": "Tax Deductions: Federal\\s+[^\\n]*\\n *Withholding Tax\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Taxes:Medicare Tax",
+            "pattern": "EE Medicare Tax\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Taxes:Social Security Tax",
+            "pattern": "EE Social Security Tax\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Taxes:CA Income Tax",
+            "pattern": "Tax Deductions: California\\s+[^\\n]*\\n *Withholding Tax\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Taxes:CA Disability",
+            "pattern": "EE Voluntary Disabilit\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Paycheck Deduction",
+            "pattern": "Prepaid Legal\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Paycheck Deduction",
+            "pattern": "\\n *Chubb Insurance\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Paycheck Deduction",
+            "pattern": "\\n *InforArmor\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Medical:Medical Insurance",
+            "pattern": "\\n *\\*Medical 125\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Medical:Dental Insurance",
+            "pattern": "\\n *\\*Dental 125\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Medical:Vision Insurance",
+            "pattern": "\\n *\\*Vision 125\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "assets:restricted:retirement:ws:401k",
+            "pattern": "\\n *\\*401K\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "assets:restricted:retirement:ws:401k",
+            "pattern": "\\n *Post Tax 401K\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "assets:restricted:fsa:ws:medical",
+            "pattern": "\\n *\\*Medical FSA 125\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "assets:restricted:fsa:ws:dependent",
+            "pattern": "\\n *\\*Dependent FSA 125\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "assets:taxable:nonliquid:ws:espp",
+            "pattern": "\\n *ESPP\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Paycheck Deduction",
+            "pattern": "\\n *Supplife Spouse AT\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "expenses:Paycheck Deduction",
+            "pattern": "\\n *Supplife Child AT\\s+([\\d,]+\\.{0,1}\\d*)-\\s+([\\d,]+\\.{0,1}\\d*)-",
+            "amount": "$1"
+        },
+        {
+            "account": "revenues:income:WS PAYROLL",
+            "pattern": "\\n *Total Net Pay\\s+([\\d,]+\\.{0,1}\\d*)\\s+([\\d,]+\\.{0,1}\\d*)",
+            "amount": "$1"
+        }
+    ]
+}
+

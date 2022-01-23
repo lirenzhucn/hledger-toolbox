@@ -3,6 +3,7 @@ module Main where
 import Control.Monad.Catch (finally)
 import Control.Monad.Reader (MonadIO (liftIO))
 import qualified Data.Text.IO as TIO
+import Utils (decodeFromJSON)
 import Ynab
 import Ynab.Db
 import Ynab.Types

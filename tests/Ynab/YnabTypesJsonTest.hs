@@ -6,6 +6,7 @@ import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Time.Calendar (Day, fromGregorian)
 import Test.Tasty
 import Test.Tasty.HUnit
+import Utils
 import Ynab.Req
 import Ynab.Types
 
