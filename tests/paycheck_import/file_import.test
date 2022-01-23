@@ -1,0 +1,30 @@
+# test against a sample input paycheck
+$ paycheck_import data - -s data/settings.json
+>
+2022-01-07 * Jane Doe paycheck (10001122) from LinkedIn on 07.01.2022
+    revenues:income:ws:salary                  $-2941.31
+    revenues:income:ws:salary                    $-70.51
+    expenses:Taxes:Federal Income Tax            $579.53
+    expenses:Taxes:Medicare Tax                   $59.74
+    expenses:Taxes:Social Security Tax           $126.46
+    expenses:Taxes:CA Income Tax                 $129.46
+    expenses:Taxes:CA Disability                  $35.44
+    expenses:Paycheck Deduction                    $9.00
+    expenses:Paycheck Deduction                   $21.27
+    expenses:Paycheck Deduction                    $8.28
+    expenses:Medical:Medical Insurance            $74.00
+    expenses:Medical:Dental Insurance             $10.00
+    expenses:Medical:Vision Insurance              $2.00
+    assets:restricted:retirement:ws:401k         $502.37
+    assets:restricted:retirement:ws:401k         $665.91
+    assets:restricted:fsa:ws:medical              $11.54
+    assets:restricted:fsa:ws:dependent           $192.31
+    assets:taxable:nonliquid:ws:espp             $141.20
+    expenses:Paycheck Deduction                    $7.20
+    expenses:Paycheck Deduction                    $0.53
+    revenues:income:WS PAYROLL                   $435.58
+
+
+>2
+[Info] Found files to process: ["data/sample.txt"]
+[Info] Journal balanced!

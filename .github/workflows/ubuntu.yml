@@ -34,7 +34,13 @@ jobs:
       run: |
         cabal update
         cabal build --only-dependencies --enable-tests --enable-benchmarks
-    - name: Build
-      run: cabal build --enable-tests --enable-benchmarks all
+    - name: Build and Install
+      run: |
+        cabal build --enable-tests --enable-benchmarks all
+        cabal install
+    - name: Install shelltestrunner
+      run: cabal install shelltestrunner
     - name: Run tests
-      run: cabal test all
+      run: |
+        cabal test all
+        PATH=~/.cabal/bin/:PATH shelltest --execdir tests/paycheck_import -a
