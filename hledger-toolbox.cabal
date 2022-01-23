@@ -23,6 +23,7 @@ extra-source-files:
 library
     exposed-modules:
         Hledger.Utils.Render
+        Paycheck
         Paycheck.Hledger
         Paycheck.Parser
         Paycheck.Types
@@ -48,6 +49,7 @@ library
         DataKinds
     build-depends:
         Decimal >=0.5.1,
+        Glob ^>=0.10.2,
         aeson ^>=2.0,
         base ^>=4.14,
         bytestring ^>= 0.10.12,

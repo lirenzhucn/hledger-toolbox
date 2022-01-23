@@ -2,25 +2,18 @@
 
 module Main where
 
-import Control.Monad (mapM)
-import Data.Text.Lazy (toStrict)
 import qualified Data.Text.IO as TIO
-import Data.Time.Clock.POSIX (getPOSIXTime)
-import Hledger.Utils.Render (renderJournal)
+import Paycheck (balanceOrWarnApp, runPaycheckApp, parsePaychecksApp, printJournalApp)
 import Paycheck.Types (AppSettings)
-import Paycheck.Hledger (makeJournal)
-import Utils (decodeFromJSON, readPdfOrTxt_)
-import System.FilePath.Glob (compile, globDir1)
+import Utils (decodeFromJSON)
 
 import Params (Params (..), cliParser)
 
 work :: FilePath -> FilePath -> AppSettings -> IO ()
 work inputDir _ settings = do
-  currTime <- getPOSIXTime
-  inputFiles <- globDir1 (compile "*.pdf") inputDir
-  contents <- mapM readPdfOrTxt_ inputFiles
-  let journal = makeJournal currTime settings contents
-  TIO.putStrLn $ toStrict $ renderJournal journal
+  runPaycheckApp doWork settings
+  where
+    doWork = parsePaychecksApp inputDir >>= balanceOrWarnApp >>= printJournalApp
 
 main :: IO ()
 main = do

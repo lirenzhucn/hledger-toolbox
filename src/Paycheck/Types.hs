@@ -1,5 +1,10 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Paycheck.Types where
 
+import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
+import Control.Monad.Reader (MonadIO, MonadReader, ReaderT)
+import Control.Monad.Logger (LoggingT, MonadLogger)
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import Data.Text (Text)
@@ -53,3 +58,17 @@ instance FromJSON AppSettings where
         { omitNothingFields = True,
           fieldLabelModifier = (camelTo2 '_') . (drop 2)
         }
+
+newtype PaycheckApp a = PaycheckApp
+  {runApp :: ReaderT AppSettings (LoggingT IO) a}
+  deriving newtype
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadLogger,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
+      MonadReader AppSettings
+    )
