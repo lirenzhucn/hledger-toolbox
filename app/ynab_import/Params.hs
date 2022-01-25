@@ -18,16 +18,14 @@ mkParams =
       ( long "no-pull-data" <> short 'n'
           <> help "Do not pull data from API"
       )
-    <*> option
-      auto
+    <*> strOption
       ( long "settings" <> short 's'
           <> help "Path to the settings file"
           <> showDefault
           <> value "./.secrets/ynab_api_import_settings.json"
           <> metavar "SETTINGS"
       )
-    <*> option
-      auto
+    <*> strOption
       ( long "db-dir" <> short 'd'
           <> help "Path to the base dir of local databases"
           <> showDefault
