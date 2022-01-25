@@ -140,10 +140,10 @@ fetchData = do
           trdChildrenIds = childrenIds
         }
 
-writeJournal :: FilePath -> YnabApp ()
-writeJournal outputFile = do
+writeJournal :: String -> FilePath -> YnabApp ()
+writeJournal year outputFile = do
   AppEnv {..} <- ask
-  allTrans <- liftIO $ getAllTransactions dbConn
+  allTrans <- liftIO $ getTransactions dbConn year
   allCategories <- liftIO $ getAllCategories dbConn
   currTime <- liftIO getPOSIXTime
   let categoryToGroup =

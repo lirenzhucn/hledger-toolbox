@@ -6,6 +6,7 @@ import Options.Applicative
 data Params = Params
   { outputFile :: FilePath,
     noPullData :: Bool,
+    year :: String,
     settingsFile :: FilePath,
     dbDir :: FilePath
   }
@@ -17,6 +18,13 @@ mkParams =
     <*> switch
       ( long "no-pull-data" <> short 'n'
           <> help "Do not pull data from API"
+      )
+    <*> strOption
+      ( long "year" <> short 'y'
+          <> help "The year to report on"
+          <> showDefault
+          <> value "all"
+          <> metavar "YEAR"
       )
     <*> strOption
       ( long "settings" <> short 's'

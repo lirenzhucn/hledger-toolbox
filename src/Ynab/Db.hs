@@ -20,6 +20,7 @@ import Database.SQLite.Simple
     executeMany,
     execute_,
     open,
+    query,
     query_,
   )
 import Database.SQLite.Simple.FromRow (FromRow (..), RowParser, field)
@@ -266,6 +267,15 @@ insertTransactions =
     \approved, account_id, account_name, payee_id, payee_name, category_id, \
     \category_name, transfer_account_id, transfer_transaction_id, memo, \
     \children) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
+getTransactions :: Connection -> String -> IO [TransactionDb]
+getTransactions conn "all" = getAllTransactions conn
+getTransactions conn year =
+  query conn
+    "SELECT id, deleted, amount, date, cleared, approved, account_id, \
+    \account_name, payee_id, payee_name, category_id, category_name, \
+    \transfer_account_id, transfer_transaction_id, memo, children FROM \
+    \transactions WHERE (date LIKE ?) ORDER BY date" (Only $ year ++ "%")
 
 getAllTransactions :: Connection -> IO [TransactionDb]
 getAllTransactions =

@@ -16,8 +16,8 @@ work params settings = do
   finally (runYnabApp doWork env) (closeDbConn $ dbConn env)
   where
     doWork
-     | noPullData params = writeJournal (outputFile params)
-     | otherwise = fetchData >> writeJournal (outputFile params)
+     | noPullData params = writeJournal (year params) (outputFile params)
+     | otherwise = fetchData >> writeJournal (year params) (outputFile params)
 
 main :: IO ()
 main = do
