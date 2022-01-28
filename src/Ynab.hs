@@ -157,6 +157,7 @@ writeJournal year outputFile = do
         MakeJournalConfig
           { cLastRead = currTime,
             cAccountMapper = accmap appSettings,
+            cPayeeMapper = pmap appSettings,
             cCategoryMapper = catmap categoryToGroup,
             cTransferAccount = transfer_account appSettings,
             cStartingBalanceAccount = starting_balance_account appSettings
@@ -166,6 +167,9 @@ writeJournal year outputFile = do
   pure ()
   where
     accmap settings acc = fromMaybe "" (M.lookup acc (account_map settings))
+    pmap settings maybePayee
+      | Just payee <- maybePayee, Just payeeAcc <- M.lookup payee (payee_map settings) = Just payeeAcc
+      | otherwise = Nothing
     catmap m (Just c) = fromMaybe "Unknown Group" (M.lookup c m)
     catmap _ Nothing = "Unknown Group"
     --

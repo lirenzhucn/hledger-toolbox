@@ -260,6 +260,7 @@ data AppSettings = AppSettings
     budget_name :: Text,
     starting_balance_account :: Text,
     transfer_account :: Text,
+    payee_map :: Map.Map Text Text,
     account_map :: Map.Map Text Text
   }
   deriving (Eq, Show, Generic, FromJSON)

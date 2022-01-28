@@ -31,6 +31,8 @@ import Ynab.Types (TransactionDb (..))
 data MakeJournalConfig = MakeJournalConfig
   { cLastRead :: POSIXTime,
     cAccountMapper :: Text -> Text,
+    -- map payee name to a possible account2
+    cPayeeMapper :: Maybe Text -> Maybe Text,
     -- map category name to category group name
     cCategoryMapper :: Maybe Text -> Text,
     cTransferAccount :: Text,
@@ -142,6 +144,7 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
       | isPayeeTransfer trdPayeeName = cTransferAccount
       | isCategoryInFlow trdCategoryName =
         "revenues:income:" <> fromMaybe "Unknown Payee" trdPayeeName
+      | Just acc2 <- cPayeeMapper trdPayeeName = acc2 
       | otherwise =
         "expenses:"
           <> cCategoryMapper trdCategoryName
