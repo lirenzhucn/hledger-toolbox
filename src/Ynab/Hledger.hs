@@ -142,9 +142,9 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
     mkAccount2
       | isPayeeStartingBalance trdPayeeName = cStartingBalanceAccount
       | isPayeeTransfer trdPayeeName = cTransferAccount
+      | Just acc2 <- cPayeeMapper trdPayeeName = acc2 
       | isCategoryInFlow trdCategoryName =
         "revenues:income:" <> fromMaybe "Unknown Payee" trdPayeeName
-      | Just acc2 <- cPayeeMapper trdPayeeName = acc2 
       | otherwise =
         "expenses:"
           <> cCategoryMapper trdCategoryName
