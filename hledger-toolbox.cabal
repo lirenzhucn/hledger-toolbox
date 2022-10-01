@@ -49,27 +49,27 @@ library
         DataKinds
     build-depends:
         Decimal >=0.5.1,
-        Glob ^>=0.10.2,
-        aeson ^>=2.0,
-        base ^>=4.14,
-        bytestring ^>= 0.10.12,
-        containers ^>=0.6,
-        exceptions ^>=0.10,
-        directory ^>=1.3.6,
-        filepath ^>=1.4.2,
-        http-client ^>=0.7.9,
-        modern-uri ^>=0.3.4,
-        monad-logger ^>=0.3.36,
-        mtl ^>=2.2,
-        process ^>=1.6.13,
-        regex-base ^>=0.94.0,
-        regex-pcre-builtin ^>=0.95.2,
-        req ^>=3.9.2,
-        sqlite-simple ^>=0.4.18,
-        text ^>= 1.2,
-        text-show ^>=3.9,
-        time ^>=1.9.3,
-        hledger-lib ^>= 1.24
+        Glob >=0.10.2,
+        aeson >=2.0,
+        base >=4.14,
+        bytestring >= 0.10.12,
+        containers >=0.6,
+        exceptions >=0.10,
+        directory >=1.3.6,
+        filepath >=1.4.2,
+        http-client >=0.7.9,
+        modern-uri >=0.3.4,
+        monad-logger >=0.3.36,
+        mtl >=2.2,
+        process >=1.6.13,
+        regex-base >=0.94.0,
+        regex-pcre-builtin >=0.95.2,
+        req >=3.9.2,
+        sqlite-simple >=0.4.18,
+        text >= 1.2,
+        text-show >=3.9,
+        time >=1.9.3,
+        hledger-lib >= 1.27
     hs-source-dirs:   src
     default-language: Haskell2010
 
@@ -80,13 +80,13 @@ executable paycheck_import
     default-extensions:
         OverloadedStrings
     build-depends:
-        Glob ^>=0.10.2,
-        base ^>=4.14,
+        Glob >=0.10.2,
+        base >=4.14,
         hledger-toolbox,
-        hledger-lib ^>= 1.24,
-        optparse-applicative ^>=0.16.1,
-        text ^>= 1.2,
-        time ^>=1.9.3
+        hledger-lib >= 1.27,
+        optparse-applicative >=0.16.1,
+        text >= 1.2,
+        time >=1.9.3
     hs-source-dirs:   app/paycheck_import
     default-language: Haskell2010
 
@@ -102,13 +102,13 @@ executable ynab_import
     default-extensions:
         OverloadedStrings
     build-depends:
-        base ^>=4.14,
-        exceptions ^>=0.10,
-        mtl ^>=2.2,
+        base >=4.14,
+        exceptions >=0.10,
+        mtl >=2.2,
         hledger-toolbox,
-        hledger-lib ^>= 1.24,
-        optparse-applicative ^>=0.16.1,
-        text ^>= 1.2
+        hledger-lib >= 1.27,
+        optparse-applicative >=0.16.1,
+        text >= 1.2
 
     hs-source-dirs:   app/ynab_import
     default-language: Haskell2010
@@ -124,12 +124,12 @@ test-suite ynab-lib-test
     default-extensions:
         OverloadedStrings
     build-depends:
-        aeson ^>=2.0,
-        base ^>=4.14,
-        bytestring ^>=0.10.12.0,
+        aeson >=2.0,
+        base >=4.14,
+        bytestring >=0.10.12.0,
         hledger-toolbox,
-        sqlite-simple ^>=0.4.18,
-        tasty ^>=1.4.2.1,
-        tasty-hunit ^>=0.10.0.3,
-        text ^>= 1.2,
-        time ^>=1.9.3
+        sqlite-simple >=0.4.18,
+        tasty >=1.4.2.1,
+        tasty-hunit >=0.10.0.3,
+        text >= 1.2,
+        time >=1.9.3

@@ -20,7 +20,6 @@ import Hledger
     SourcePos (..),
     Status (..),
     Transaction (..),
-    amount,
     amountstyle,
     mkPos,
     usd,
@@ -113,10 +112,11 @@ makeTransaction MakeJournalConfig {..} TransactionDb {..} =
   where
     negTransAmount = transAmount {aquantity = - (aquantity transAmount)}
     transAmount =
-      amount
+      Amount
         { acommodity = "$",
           aquantity = Decimal 3 (toInteger trdAmount),
-          astyle = amountstyle {asprecision = Precision 2}
+          astyle = amountstyle {asprecision = Precision 2},
+          aprice = Nothing
         }
     defaultSourcePosPair =
       (SourcePos "" (mkPos 1) (mkPos 1), SourcePos "" (mkPos 2) (mkPos 1))
