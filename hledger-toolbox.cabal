@@ -27,6 +27,7 @@ library
         Paycheck.Hledger
         Paycheck.Parser
         Paycheck.Types
+        StockPrices.AlphaVantage
         Utils
         Ynab
         Ynab.Db
@@ -69,6 +70,7 @@ library
         text >= 1.2,
         text-show >=3.9,
         time >=1.9.3,
+        unordered-containers <0.3,
         hledger-lib >= 1.27
     hs-source-dirs:   src
     default-language: Haskell2010
@@ -111,6 +113,27 @@ executable ynab_import
         text >= 1.2
 
     hs-source-dirs:   app/ynab_import
+    default-language: Haskell2010
+
+executable stockprices
+    main-is:          Main.hs
+
+    other-modules:
+        Config,
+        Utils
+
+    build-depends:
+        aeson >=1 && <3,
+        base >=4.14,
+        directory <2,
+        hledger-toolbox,
+        optparse-applicative >=0.16.1,
+        safe-exceptions >0.1.7,
+        text >=1.2,
+        xdg-basedir <1,
+        yaml <1
+
+    hs-source-dirs: app/stockprices
     default-language: Haskell2010
 
 test-suite ynab-lib-test
