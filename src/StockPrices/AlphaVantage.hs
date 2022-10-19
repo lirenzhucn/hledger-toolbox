@@ -114,31 +114,72 @@ filterByDate startDay endDay =
     . dropWhile ((< startDay) . fst)
     . L.sortOn fst
 
+data AlphaVantageGetType
+  = StockGet { sgFunc :: T.Text }
+  | CryptoGet { cgFunc :: T.Text, cgMarket :: T.Text }
+
+getByFunctionAndFilter
+  :: (FromJSON a, FromJSON b)
+  => AlphaVantageGetType
+  -> (a -> [(Day, b)])
+  -> AlphaVantageConfig
+  -> T.Text
+  -> Day
+  -> Day
+  -> IO (AlphaVantageResponse [(Day, b)])
+getByFunctionAndFilter getType f cfg symbol startDay endDay = do
+  resp <- runReq defaultHttpConfig $ req
+    GET
+    (https "www.alphavantage.co" /~ ("query" :: T.Text))
+    NoReqBody
+    jsonResponse
+    (params getType)
+  return . fmap (filterByDate startDay endDay . f) $ responseBody resp
+  where
+    params StockGet { .. } =
+      (  ("function" =: (sgFunc))
+      <> ("symbol" =: symbol)
+      <> ("outputsize" =: ("full" :: T.Text))
+      <> ("datatype" =: ("json" :: T.Text))
+      <> ("apikey" =: cApiKey cfg)
+      )
+    params CryptoGet { .. } =
+      (  ("function" =: (cgFunc))
+      <> ("symbol" =: symbol)
+      <> ("market" =: cgMarket)
+      <> ("apikey" =: cApiKey cfg)
+      )
+
 getDailyPrices
   :: AlphaVantageConfig
   -> T.Text
   -> Day
   -> Day
   -> IO (AlphaVantageResponse [(Day, Prices)])
-getDailyPrices = getByFunctionAndFilter "TIME_SERIES_DAILY"
+getDailyPrices = getByFunctionAndFilter (StockGet "TIME_SERIES_DAILY") fromPriceList
 
-getByFunctionAndFilter
-  :: T.Text
-  -> AlphaVantageConfig
+getWeeklyPrices
+  :: AlphaVantageConfig
   -> T.Text
   -> Day
   -> Day
   -> IO (AlphaVantageResponse [(Day, Prices)])
-getByFunctionAndFilter func cfg symbol startDay endDay = do
-  resp <- runReq defaultHttpConfig $ req
-    GET
-    (https "www.alphavantage.co" /~ ("query" :: T.Text))
-    NoReqBody
-    jsonResponse
-    (  ("function" =: (func))
-    <> ("symbol" =: symbol)
-    <> ("outputsize" =: ("full" :: T.Text))
-    <> ("datatype" =: ("json" :: T.Text))
-    <> ("apikey" =: cApiKey cfg)
-    )
-  return . fmap (filterByDate startDay endDay . fromPriceList) $ responseBody resp
+getWeeklyPrices = getByFunctionAndFilter (StockGet "TIME_SERIES_WEEKLY") fromPriceList
+
+getCryptoDailyPrices
+  :: AlphaVantageConfig
+  -> T.Text
+  -> Day
+  -> Day
+  -> IO (AlphaVantageResponse [(Day, CryptoPrices)])
+getCryptoDailyPrices =
+  getByFunctionAndFilter (CryptoGet "DIGITAL_CURRENCY_DAILY" "USD") fromCryptoPriceList
+
+getCryptoWeeklyPrices
+  :: AlphaVantageConfig
+  -> T.Text
+  -> Day
+  -> Day
+  -> IO (AlphaVantageResponse [(Day, CryptoPrices)])
+getCryptoWeeklyPrices =
+  getByFunctionAndFilter (CryptoGet "DIGITAL_CURRENCY_WEEKLY" "USD") fromCryptoPriceList

@@ -28,6 +28,7 @@ library
         Paycheck.Parser
         Paycheck.Types
         StockPrices.AlphaVantage
+        StockPrices.Hledger
         Utils
         Ynab
         Ynab.Db
@@ -66,6 +67,8 @@ library
         regex-base >=0.94.0,
         regex-pcre-builtin >=0.95.2,
         req >=3.9.2,
+        safe >=0.3.5 && <1,
+        split <1,
         sqlite-simple >=0.4.18,
         text >= 1.2,
         text-show >=3.9,
@@ -125,11 +128,14 @@ executable stockprices
     build-depends:
         aeson >=1 && <3,
         base >=4.14,
+        bytestring <1,
         directory <2,
         hledger-toolbox,
+        hledger-lib >= 1.27,
         optparse-applicative >=0.16.1,
         safe-exceptions >0.1.7,
         text >=1.2,
+        time <2,
         xdg-basedir <1,
         yaml <1
 
@@ -144,6 +150,24 @@ test-suite ynab-lib-test
     other-modules:
         YnabTypesJsonTest
         YnabDbTest
+    default-extensions:
+        OverloadedStrings
+    build-depends:
+        aeson >=2.0,
+        base >=4.14,
+        bytestring >=0.10.12.0,
+        hledger-toolbox,
+        sqlite-simple >=0.4.18,
+        tasty >=1.4.2.1,
+        tasty-hunit >=0.10.0.3,
+        text >= 1.2,
+        time >=1.9.3
+
+test-suite stockprices-lib-test
+    default-language: Haskell2010
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   tests/StockPrices
+    main-is:          StockPricesTest.hs
     default-extensions:
         OverloadedStrings
     build-depends:
