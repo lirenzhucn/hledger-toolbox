@@ -36,9 +36,10 @@ import System.IO ( hPutStrLn, stderr )
 import StockPrices.AlphaVantage ( AlphaVantageConfig
                                 , AlphaVantageResponse (..)
                                 , CryptoPrices (..)
+                                , PriceDataFrequency (..)
                                 , Prices (..)
-                                , getDailyPrices
-                                , getCryptoDailyPrices
+                                , getPricesAtFrequency
+                                , getCryptoPricesAtFrequency
                                 )
 
 -- Given a list of commodities to exclude and a journal file, return the
@@ -84,11 +85,12 @@ data GenericPrice = Stock Prices | Crypto CryptoPrices
 -- limiting the returned prices between the given days
 fetchPrices
   :: AlphaVantageConfig
+  -> PriceDataFrequency
   -> [(CommoditySymbol, Day, Day)]
   -> [T.Text]
   -> Bool
   -> IO [(CommoditySymbol, [(Day, GenericPrice)])]
-fetchPrices cfg comTbl cryptos rateLimit = do
+fetchPrices cfg freq comTbl cryptos rateLimit = do
   let (stockTable, cryptoTable) = L.partition (\(c, _, _) -> notElem c cryptos) comTbl
       genericAction = map FetchStock stockTable <> map FetchCrypto cryptoTable
   if rateLimit
@@ -102,13 +104,13 @@ fetchPrices cfg comTbl cryptos rateLimit = do
           (symbol, "Stock", )
             <$> try
               (fmap (map (second Stock))
-              <$> getDailyPrices cfg symbol start end
+              <$> getPricesAtFrequency freq cfg symbol start end
               )
         FetchCrypto (symbol, start, end) ->
           (symbol, "Cryptocurrency", )
             <$> try
               (fmap (map (second Crypto))
-              <$> getCryptoDailyPrices cfg symbol start end
+              <$> getCryptoPricesAtFrequency freq cfg symbol start end
               )
       case resp of
         Left (e :: SomeException) -> do

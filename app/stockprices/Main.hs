@@ -32,7 +32,7 @@ main = do
     journalFile
   if not dryRun
     then do
-      prices <- fetchPrices cfg comTbl cryptoCommodities rateLimit
+      prices <- fetchPrices cfg frequency comTbl cryptoCommodities rateLimit
       if null prices
         then logError "No prices were fetched"
         else LBS.writeFile outputFile $ makePriceDirectives prices

@@ -6,7 +6,7 @@
 module Config where
 
 import Control.Exception.Safe ( try )
-import Data.Aeson ( (.:?), FromJSON(..), withObject )
+import Data.Aeson ( (.:?), FromJSON(..), withObject, withText )
 import Options.Applicative
 import Data.List ( intersperse )
 import qualified Data.Text as T
@@ -18,7 +18,11 @@ import System.Environment ( lookupEnv )
 import System.Environment.XDG.BaseDir ( getUserConfigFile )
 import System.Exit ( exitFailure )
 
+import StockPrices.AlphaVantage ( PriceDataFrequency (..) )
 import Utils ( logError, logWarning )
+
+instance FromJSON PriceDataFrequency where
+  parseJSON = withText "PriceDataFrequency" (return . read . T.unpack)
 
 data AppConfig = AppConfig
   { apiKey              :: String
@@ -27,6 +31,7 @@ data AppConfig = AppConfig
   , outputFile          :: FilePath
   , excludedCommodities :: [String]
   , cryptoCommodities   :: [T.Text]
+  , frequency           :: PriceDataFrequency
   , dryRun              :: Bool
   }
   deriving (Show, Eq)
@@ -36,6 +41,7 @@ data ConfigFile = ConfigFile
   , cfgRateLimit           :: Maybe Bool
   , cfgExcludedCommodities :: Maybe [String]
   , cfgCryptoCommodities   :: Maybe [String]
+  , cfgFrequency           :: Maybe PriceDataFrequency
   }
   deriving (Show, Eq)
 
@@ -45,6 +51,7 @@ instance FromJSON ConfigFile where
     cfgRateLimit <- o .:? "rate-limit"
     cfgExcludedCommodities <- o .:? "exclude"
     cfgCryptoCommodities <- o .:? "crypto"
+    cfgFrequency <- o .:? "frequency"
     return ConfigFile { .. }
 
 data Args = Args
@@ -54,6 +61,7 @@ data Args = Args
   , argOutputFile          :: FilePath
   , argExcludedCommodities :: [String]
   , argCryptoCommodities   :: [String]
+  , argFrequency           :: Maybe PriceDataFrequency
   , argDryRun              :: Bool
   }
   deriving (Show, Eq)
@@ -102,6 +110,11 @@ cliParser = execParser opts
           <> help "List of cryptocurrency commodities"
           <> metavar "CRYPTO"
           )
+        <*>
+          ( optional $ option auto $ long "frequency" <> short 'f'
+          <> help "Frequency of prices; valid options are daily, weekly, and monthly"
+          <> metavar "FREQUENCY"
+          )
         <*> switch
           ( long "dry-run" <> short 'd'
           <> help "Display the commodities and dates without actually querying prices"
@@ -121,7 +134,7 @@ loadConfigFile = do
     else return defaultConfig
   where
     defaultConfig :: ConfigFile
-    defaultConfig = ConfigFile Nothing Nothing Nothing Nothing
+    defaultConfig = ConfigFile Nothing Nothing Nothing Nothing Nothing
     strJoin :: String -> [String] -> String
     strJoin sep strList = foldl (++) "" $ intersperse sep strList
 
@@ -148,6 +161,7 @@ mergeArgsEnvCfg ConfigFile {..} Args {..} = do
           then maybe [] (map T.pack) cfgCryptoCommodities
           else concatMap (T.splitOn "," . T.pack) argCryptoCommodities
       outputFile = argOutputFile
+      frequency  = fromMaybe Weekly $ argFrequency <|> cfgFrequency
       dryRun     = argDryRun
   return AppConfig {..}
   where

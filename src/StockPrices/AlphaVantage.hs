@@ -3,8 +3,19 @@
 
 module StockPrices.AlphaVantage where
 
-import Data.Aeson ( (.:), (.:?), FromJSON (..), Value (Object), withObject )
+import Data.Aeson ( (.:)
+                  , (.:?)
+                  , (<?>)
+                  , FromJSON (..)
+                  , Object
+                  , Value (..)
+                  , withObject
+                  )
+import Data.Aeson.Key ( Key(..), toText )
+import Data.Aeson.Types ( JSONPathElement (..) )
+import qualified Data.Aeson.KeyMap as KM
 import Data.Aeson.Types ( Parser )
+import Data.Char ( toLower )
 import Data.Decimal ( Decimal )
 import qualified Data.HashMap.Strict as HM
 import qualified Data.List as L
@@ -23,6 +34,16 @@ import Network.HTTP.Req ( (/~)
                         , runReq
                         )
 import Text.Read ( readMaybe )
+
+data PriceDataFrequency = Daily | Weekly | Monthly
+  deriving (Eq, Show)
+
+instance Read PriceDataFrequency where
+  readsPrec _ input = case (map toLower input) of
+    "daily" -> [(Daily, "")]
+    "weekly" -> [(Weekly, "")]
+    "monthly" -> [(Monthly, "")]
+    _ -> []
 
 newtype AlphaVantageConfig = AlphaVantageConfig { cApiKey :: T.Text }
   deriving (Show, Read, Eq, Generic)
@@ -88,9 +109,21 @@ instance FromJSON CryptoPrices where
 newtype PriceList = PriceList { fromPriceList :: [(Day, Prices)] }
   deriving (Show, Read, Eq, Generic)
 
+explicitParseFieldPrefix :: (Value -> Parser a) -> Object -> T.Text -> Parser a
+explicitParseFieldPrefix p obj prefix =
+  case  ( KM.toList $
+          KM.filterWithKey
+            (\k _ -> T.isInfixOf prefix $ toText k)
+            obj
+        ) of
+    [(k,v)] -> p v <?> Key k
+    (k,v):_ -> p v <?> Key k
+    _ -> fail $ "key with prefix `" ++ (T.unpack prefix) ++ "` not found"
+
+
 instance FromJSON PriceList where
   parseJSON = withObject "PriceList" $ \v -> do
-    inner <- v .: "Time Series (Daily)"
+    inner <- explicitParseFieldPrefix parseJSON v "Time Series"
     let daysAndPrices = HM.toList inner
     PriceList <$> mapM
       (\(d, ps) -> (,) <$> parseAlphaVantageDay d <*> parseJSON ps)
@@ -150,36 +183,32 @@ getByFunctionAndFilter getType f cfg symbol startDay endDay = do
       <> ("apikey" =: cApiKey cfg)
       )
 
-getDailyPrices
-  :: AlphaVantageConfig
+getPricesAtFrequency
+  :: PriceDataFrequency
+  -> AlphaVantageConfig
   -> T.Text
   -> Day
   -> Day
   -> IO (AlphaVantageResponse [(Day, Prices)])
-getDailyPrices = getByFunctionAndFilter (StockGet "TIME_SERIES_DAILY") fromPriceList
+getPricesAtFrequency freq =
+  getByFunctionAndFilter (StockGet $ funcToUse freq) fromPriceList
+  where
+    funcToUse :: PriceDataFrequency -> T.Text
+    funcToUse Daily   = "TIME_SERIES_DAILY" :: T.Text
+    funcToUse Weekly  = "TIME_SERIES_WEEKLY" :: T.Text
+    funcToUse Monthly = "TIME_SERIES_MONTHLY" :: T.Text
 
-getWeeklyPrices
-  :: AlphaVantageConfig
-  -> T.Text
-  -> Day
-  -> Day
-  -> IO (AlphaVantageResponse [(Day, Prices)])
-getWeeklyPrices = getByFunctionAndFilter (StockGet "TIME_SERIES_WEEKLY") fromPriceList
-
-getCryptoDailyPrices
-  :: AlphaVantageConfig
-  -> T.Text
-  -> Day
-  -> Day
-  -> IO (AlphaVantageResponse [(Day, CryptoPrices)])
-getCryptoDailyPrices =
-  getByFunctionAndFilter (CryptoGet "DIGITAL_CURRENCY_DAILY" "USD") fromCryptoPriceList
-
-getCryptoWeeklyPrices
-  :: AlphaVantageConfig
+getCryptoPricesAtFrequency
+  :: PriceDataFrequency
+  -> AlphaVantageConfig
   -> T.Text
   -> Day
   -> Day
   -> IO (AlphaVantageResponse [(Day, CryptoPrices)])
-getCryptoWeeklyPrices =
-  getByFunctionAndFilter (CryptoGet "DIGITAL_CURRENCY_WEEKLY" "USD") fromCryptoPriceList
+getCryptoPricesAtFrequency freq =
+  getByFunctionAndFilter (CryptoGet (funcToUse freq) "USD") fromCryptoPriceList
+  where
+    funcToUse :: PriceDataFrequency -> T.Text
+    funcToUse Daily   = "DIGITAL_CURRENCY_DAILY" :: T.Text
+    funcToUse Weekly  = "DIGITAL_CURRENCY_WEEKLY" :: T.Text
+    funcToUse Monthly = "DIGITAL_CURRENCY_MONTHLY" :: T.Text
