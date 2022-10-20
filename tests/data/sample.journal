@@ -59,5 +59,9 @@
     assets:brokerage   -1 AAPL @@ $1
     assets:bank:checking
 
+2022/08/01 * buy MSTF
+    assets:brokerage   1 MSFT @@ $1
+    assets:bank:checking
+
 
 ;final comment

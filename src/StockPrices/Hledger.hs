@@ -14,6 +14,7 @@ import Data.Bifunctor ( second )
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Decimal ( Decimal )
+import Data.Default ( Default (..) )
 import qualified Data.List as L
 import Data.List.Split ( chunksOf )
 import qualified Data.Map.Strict as M
@@ -30,6 +31,8 @@ import Data.Time  ( Day
                   )
 import Hledger
 import Hledger.Data.Types ( MixedAmount (Mixed) )
+import Hledger.Reports.BalanceReport ( balanceReport, BalanceReport )
+import Hledger.Reports.ReportOptions ( ReportSpec(..) )
 import Safe.Foldable ( maximumMay, minimumMay )
 import System.IO ( hPutStrLn, stderr )
 
@@ -54,8 +57,30 @@ getCommoditiesAndDateRange excluded journalPath = do
         filter (`notElem` excluded)
           $ M.keys (jcommodities journal)
           <> M.keys (jinferredcommodities journal)
-  return $
-    map (\c -> getDatesForCommodity currentTime c (jtxns journal)) commodities
+      res = map
+        ( (adjustMaxDate currentTime journal)
+        . (getDatesForCommodity currentTime (jtxns journal)))
+        commodities
+  return res
+  where
+    adjustMaxDate :: UTCTime -> Journal -> (CommoditySymbol, Day, Day) -> (CommoditySymbol, Day, Day)
+    adjustMaxDate currentTime j (c, sd, ed) = case (commodityBalance j c) > 0 of
+        True -> (c, sd, max ed (utctDay currentTime))
+        False -> (c, sd, ed)
+    commodityBalance :: Journal -> CommoditySymbol -> Quantity
+    commodityBalance j c =
+      let r = balanceReport defaultreportspec j
+      in f r c
+    f :: BalanceReport -> CommoditySymbol -> Quantity
+    f (_, Mixed m) c = foldl (\q1 a2 -> q1 + (aquantity a2)) 0 $
+      filter (\a -> acommodity a == c) $ [ a | (_, a) <- M.toList m ]
+    defaultreportspec :: ReportSpec
+    defaultreportspec = ReportSpec
+      { _rsReportOpts = def
+      , _rsDay        = nulldate
+      , _rsQuery      = Any
+      , _rsQueryOpts  = []
+      }
 
 commoditiesOfMixedAmount :: MixedAmount -> [CommoditySymbol]
 commoditiesOfMixedAmount (Mixed m) = [ acommodity a | (_, a) <- M.toList m ]
@@ -63,8 +88,8 @@ commoditiesOfMixedAmount (Mixed m) = [ acommodity a | (_, a) <- M.toList m ]
 commoditiesOfTransaction :: Transaction -> [CommoditySymbol]
 commoditiesOfTransaction t = foldl (++) [] $ map (commoditiesOfMixedAmount . pamount) (tpostings t)
 
-getDatesForCommodity :: UTCTime -> CommoditySymbol -> [Transaction] -> (CommoditySymbol, Day, Day)
-getDatesForCommodity currentTime commodity txns = (commodity, minDate, maxDate)
+getDatesForCommodity :: UTCTime -> [Transaction] -> CommoditySymbol -> (CommoditySymbol, Day, Day)
+getDatesForCommodity currentTime txns commodity = (commodity, minDate, maxDate)
   where
     currentYear = (\(y, _, _) -> y) $ toGregorian $ utctDay currentTime
     dates = map tdate $ filter (\t -> elem commodity (commoditiesOfTransaction t)) txns
