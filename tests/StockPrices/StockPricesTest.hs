@@ -4,7 +4,7 @@ import Data.Time ( fromGregorian )
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import StockPrices.AlphaVantage
+import StockPrices.Types
 import StockPrices.Hledger
 import Utils
 

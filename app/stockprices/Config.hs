@@ -18,7 +18,7 @@ import System.Environment ( lookupEnv )
 import System.Environment.XDG.BaseDir ( getUserConfigFile )
 import System.Exit ( exitFailure )
 
-import StockPrices.AlphaVantage ( PriceDataFrequency (..) )
+import StockPrices.Types ( PriceDataFrequency (..) )
 import Utils ( logError, logWarning )
 
 instance FromJSON PriceDataFrequency where
@@ -153,9 +153,9 @@ mergeArgsEnvCfg ConfigFile {..} Args {..} = do
         fromMaybe "~/.hledger.journal" $ argJournalFile <|> envJournalFile
       rateLimit = not argNoRateLimit
       excludedCommodities =
-        if argExcludedCommodities == defaultExcludedCommodities
+        if null argExcludedCommodities
           then fromMaybe defaultExcludedCommodities cfgExcludedCommodities
-          else argExcludedCommodities
+          else defaultExcludedCommodities
       cryptoCommodities =
         if null argCryptoCommodities
           then maybe [] (map T.pack) cfgCryptoCommodities

@@ -14,7 +14,7 @@ import Config ( AppConfig (..)
               , loadConfigFile
               , mergeArgsEnvCfg
               )
-import StockPrices.AlphaVantage ( AlphaVantageConfig (..) )
+import StockPrices.Types ( AlphaVantageConfig (..) )
 import StockPrices.Hledger ( getCommoditiesAndDateRange
                            , fetchPrices
                            , makePriceDirectives

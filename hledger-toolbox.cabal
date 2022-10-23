@@ -28,7 +28,9 @@ library
         Paycheck.Parser
         Paycheck.Types
         StockPrices.AlphaVantage
+        StockPrices.Db
         StockPrices.Hledger
+        StockPrices.Types
         Utils
         Ynab
         Ynab.Db

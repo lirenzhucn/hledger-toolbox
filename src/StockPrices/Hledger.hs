@@ -36,12 +36,15 @@ import Hledger.Reports.ReportOptions ( ReportSpec(..) )
 import Safe.Foldable ( maximumMay, minimumMay )
 import System.IO ( hPutStrLn, stderr )
 
-import StockPrices.AlphaVantage ( AlphaVantageConfig
-                                , AlphaVantageResponse (..)
-                                , CryptoPrices (..)
-                                , PriceDataFrequency (..)
-                                , Prices (..)
-                                , getPricesAtFrequency
+import StockPrices.Types  ( AlphaVantageConfig
+                          , AlphaVantageRequest (..)
+                          , AlphaVantageResponse (..)
+                          , CryptoPrices (..)
+                          , GenericPrice (..)
+                          , PriceDataFrequency (..)
+                          , Prices (..)
+                          )
+import StockPrices.AlphaVantage ( getPricesAtFrequency
                                 , getCryptoPricesAtFrequency
                                 )
 
@@ -99,12 +102,6 @@ getDatesForCommodity currentTime txns commodity = (commodity, minDate, maxDate)
     maxDate = case maximumMay dates of
       Just d -> d
       Nothing -> utctDay currentTime
-
-data AlphaVantageRequest
-  = FetchStock (CommoditySymbol, Day, Day)
-  | FetchCrypto (CommoditySymbol, Day, Day)
-
-data GenericPrice = Stock Prices | Crypto CryptoPrices
 
 -- Fetch the prices for the commodities from the AlphaVantage API
 -- limiting the returned prices between the given days
