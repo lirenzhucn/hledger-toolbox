@@ -9,7 +9,7 @@ import Data.Maybe (catMaybes)
 import Data.Text (Text, replace, unpack)
 import Data.Time (ParseTime, defaultTimeLocale, parseTimeOrError)
 import Hledger
-import Hledger.Read.Common (mamountp')
+import Hledger.Read.Common (parsemixedamount')
 import Text.Regex.PCRE (MatchResult (..), (=~))
 import Text.Regex.PCRE.Text
 
@@ -17,13 +17,12 @@ import Paycheck.Types
 
 amountExtractor :: Text -> Text -> Text -> Maybe MixedAmount
 amountExtractor amountConfig patternConfig content =
-  let matchAmountsT = mrSubList (content =~ patternConfig :: MatchResult Text) in
+  let matchAmountsT = mrSubList (content =~ patternConfig) in
     case matchAmountsT of
       [] -> Nothing
       xs -> Just $ mkAmount xs
   where
-    -- TODO: deal with errors from `mamountp'` and `(!!)`
-    mkAmount ms = mamountp' $ unpack $
+    mkAmount ms = parsemixedamount' $ unpack $
       (matchAmountFields !! 0) <> "$" <> (replace "," "" (matchAmountT ms))
     matchAmountT ms = ms !! ((read $ unpack (matchAmountFields !! 1) :: Int) - 1)
     matchAmountFields = mrSubList
@@ -59,7 +58,7 @@ buildTransDesc GlobalConfig {..} content =
       replace "${employer_name}" employerName $
         replace "${check_date}" checkDate gcTransDesc
   where
-    matchFirst pattern = head $ mrSubList (content =~ pattern :: MatchResult Text)
+    matchFirst pattern = head $ mrSubList (content =~ (pattern :: Text))
     recipientName = matchFirst gcRecipientName
     employerName = matchFirst gcEmployerName
     checkDate = matchFirst gcCheckDate
