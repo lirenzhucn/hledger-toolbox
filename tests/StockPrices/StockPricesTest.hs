@@ -71,6 +71,6 @@ hledgerTests =
   testGroup
     "Hledger related tests"
     [ testCase "Get date range of commodity" $ do
-        res <- getCommoditiesAndDateRange ["$", "USD", "AUTO"] "./tests/data/sample.journal"
+        res <- getCommoditiesAndDateRange ["$", "USD", "AUTO", "MSFT"] "./tests/data/sample.journal"
         res @?= [("AAPL", (fromGregorian 2009 1 1), (fromGregorian 2009 11 12))]
     ]

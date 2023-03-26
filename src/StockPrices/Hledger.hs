@@ -13,7 +13,7 @@ import Control.Exception ( SomeException
 import Data.Bifunctor ( second )
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Decimal ( Decimal )
+import Data.Decimal ( Decimal, roundTo )
 import Data.Default ( Default (..) )
 import qualified Data.List as L
 import Data.List.Split ( chunksOf )
@@ -194,5 +194,5 @@ makePriceDirectives = (<> "\n") . LBS.intercalate "\n\n" . map makeDirectives
         ]
     getClosePrice :: GenericPrice -> Decimal
     getClosePrice = \case
-      Stock Prices { pClose } -> pClose
-      Crypto CryptoPrices { cpClose } -> cpClose
+      Stock Prices { pClose } -> roundTo 2 pClose
+      Crypto CryptoPrices { cpClose } -> roundTo 2 cpClose
