@@ -17,7 +17,7 @@ readPdfOrTxt :: FilePath -> FilePath -> IO Text
 readPdfOrTxt pdftotextBin fpath = do
   let txtPath = dropExtension fpath ++ (".txt" :: FilePath)
   when (takeExtension fpath /= ".txt") $
-    callProcess pdftotextBin ["-layout", fpath]
+    callProcess pdftotextBin ["-layout", "-enc", "ASCII7", fpath]
   res <- TIO.readFile txtPath
   when (takeExtension fpath /= ".txt") $
     removeFile txtPath
